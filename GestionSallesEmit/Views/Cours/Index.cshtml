@@ -1,0 +1,17 @@
+@model IEnumerable<GestionSallesEmit.Models.Cours>
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="text-primary">Gestion des Cours</h1>
+        <a asp-action="Create" class="btn btn-success">➕ Ajouter un Cours</a>
+    </div>
+    <table class="table table-bordered table-striped">
+        <thead class="table-dark">
+            <tr><th>Nom du Cours</th><th>Crédits</th></tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model) {
+                <tr><td>@item.NomCours</td><td>@item.Credit</td></tr>
+            }
+        </tbody>
+    </table>
+</div>

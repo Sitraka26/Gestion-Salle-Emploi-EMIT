@@ -1,0 +1,36 @@
+@model IEnumerable<GestionSallesEmit.Models.Salle>
+
+@{
+    ViewData["Title"] = "Liste des Salles - EMIT";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="text-primary">Gestion des Salles (EMIT)</h1>
+        <a asp-action="Create" class="btn btn-success">➕ Ajouter une Salle</a>
+    </div>
+
+    <table class="table table-bordered table-striped">
+        <thead class="table-dark">
+            <tr>
+                <th>Nom de la Salle</th>
+                <th>Capacité (Places)</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (!Model.Any())
+            {
+                <tr>
+                    <td colspan="2" class="text-center text-muted">Aucune salle enregistrée pour le moment.</td>
+                </tr>
+            }
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.NomSalle</td>
+                    <td>@item.Capacite</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

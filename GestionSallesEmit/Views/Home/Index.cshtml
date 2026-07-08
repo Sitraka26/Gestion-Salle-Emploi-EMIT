@@ -1,8 +1,26 @@
 ﻿@{
     ViewData["Title"] = "Home Page";
+    ViewData["BodyClass"] = "home-page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="home-hero">
+    <div class="home-hero-content">
+        <div class="home-hero-top">
+            <div class="home-hero-badge">Nouveau design</div>
+            <h1 class="home-hero-title">Bienvenue</h1>
+
+            <form class="home-search-form" role="search" method="get" action="#">
+                <input type="search" name="query" class="home-search-input" placeholder="Rechercher une salle, un cours ou un enseignant..." aria-label="Recherche" />
+                <button type="submit" class="btn btn-primary home-search-button">Rechercher</button>
+            </form>
+        </div>
+
+        <div class="home-hero-features">
+            <div class="feature-card"><strong>🏫 Salles</strong><span>Voir les détails et disponibilités</span></div>
+            <div class="feature-card"><strong>👨‍🏫 Enseignants</strong><span>Consulter les profils et créneaux</span></div>
+            <div class="feature-card"><strong>📅 Emploi</strong><span>Planifier facilement vos séances</span></div>
+        </div>
+
+        <p class="home-hero-note">Accédez à vos salles, cours et emplois du temps avec une expérience claire et colorée.</p>
+    </div>
 </div>
