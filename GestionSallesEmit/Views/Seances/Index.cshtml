@@ -1,94 +1,253 @@
 @model IEnumerable<GestionSallesEmit.Models.Seance>
 
-<div class="container-fluid mt-5 px-4">
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card shadow-lg border-0">
-                <div class="card-header bg-gradient text-white py-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h2 class="mb-0" style="font-weight: 700;">📆 Emploi du Temps - EMIT</h2>
-                            <small class="text-white-50">Vue des sessions de cours planifiées</small>
-                        </div>
-                        <a asp-action="Create" class="btn btn-light fw-bold" style="font-size: 1.1rem; padding: 10px 20px;">
-                            <i class="fas fa-plus"></i> Planifier un Cours
-                        </a>
-                    </div>
-                </div>
-                <div class="card-body p-4">
-                    <!-- Tableau des séances -->
-                    <div class="table-responsive">
-                        @if (Model.Any())
-                        {
-                            <table class="table table-hover table-striped table-bordered">
-                                <thead class="table-dark sticky-top">
-                                    <tr>
-                                        <th class="text-center" width="12%">📅 Jour</th>
-                                        <th class="text-center" width="15%">🕒 Horaire</th>
-                                        <th width="25%">📚 Cours</th>
-                                        <th width="20%">👨‍🏫 Enseignant</th>
-                                        <th class="text-center" width="15%">🏫 Salle</th>
-                                        <th class="text-center" width="13%">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var seance in Model.OrderBy(s => Array.IndexOf(new[] { "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi" }, s.Jour)).ThenBy(s => s.HeureDebut))
-                                    {
-                                        <tr class="align-middle">
-                                            <td class="text-center">
-                                                <span class="badge bg-primary fs-6">@seance.Jour</span>
-                                            </td>
-                                            <td class="text-center">
-                                                <strong>@seance.HeureDebut</strong> - @seance.HeureFin
-                                            </td>
-                                            <td>
-                                                <strong>@seance.Cours?.NomCours</strong>
-                                            </td>
-                                            <td>
-                                                @seance.Enseignant?.Nom @seance.Enseignant?.Prenom
-                                            </td>
-                                            <td class="text-center">
-                                                <span class="badge bg-info fs-6">@seance.Salle?.NomSalle</span>
-                                            </td>
-                                            <td class="text-center">
-                                                <a href="#" class="btn btn-sm btn-outline-warning" title="Modifier">✏️</a>
-                                                <a href="#" class="btn btn-sm btn-outline-danger" title="Supprimer">🗑️</a>
-                                            </td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        }
-                        else
-                        {
-                            <div class="alert alert-info text-center py-5" role="alert">
-                                <h4 class="mb-2">📌 Aucune séance planifiée</h4>
-                                <p class="mb-3">Commencez par planifier votre première session de cours.</p>
-                                <a asp-action="Create" class="btn btn-primary">
-                                    <i class="fas fa-plus"></i> Créer une Séance
-                                </a>
-                            </div>
-                        }
-                    </div>
+<div class="container mt-4">
+    <section class="page-header">
+        <div>
+            <p class="text-uppercase text-primary small mb-2">Emploi du Temps</p>
+            <h1 class="page-title">Planifiez vos séances avec précision</h1>
+            <p class="page-description">Filtrez par jour, cours, enseignant ou salle et organisez les sessions dans un tableau clair et agréable à consulter.</p>
+        </div>
+        <div class="page-actions">
+            <button id="refreshBtn" class="btn btn-soft-secondary btn-lg">🔄 Rafraîchir</button>
+            <a asp-action="Create" class="btn btn-primary btn-lg">Planifier une séance</a>
+        </div>
+    </section>
+
+    <section class="section-panel">
+        <div class="control-toolbar">
+            <div>
+                <h2 class="panel-title">Vue des séances</h2>
+                <p class="text-muted mb-0">Toujours savoir quelle salle et quel enseignant sont assignés à chaque créneau.</p>
+            </div>
+            <div class="d-flex flex-wrap gap-2 align-items-center">
+                <input id="searchInput" class="form-control form-control-sm" placeholder="Rechercher cours, enseignant ou salle..." style="min-width: 220px;" />
+                <select id="jourSelect" class="form-select form-select-sm" style="min-width: 140px;">
+                    <option value="">Tous les jours</option>
+                    <option value="Lundi">Lundi</option>
+                    <option value="Mardi">Mardi</option>
+                    <option value="Mercredi">Mercredi</option>
+                    <option value="Jeudi">Jeudi</option>
+                    <option value="Vendredi">Vendredi</option>
+                    <option value="Samedi">Samedi</option>
+                </select>
+                <select id="enseignantSelect" class="form-select form-select-sm" style="min-width: 170px;">
+                    <option value="">Tous les enseignants</option>
+                    @foreach (var enseignant in (SelectList)ViewBag.Enseignants)
+                    {
+                        <option value="@enseignant.Value">@enseignant.Text</option>
+                    }
+                </select>
+                <select id="salleSelect" class="form-select form-select-sm" style="min-width: 170px;">
+                    <option value="">Toutes les salles</option>
+                    @foreach (var salle in (SelectList)ViewBag.Salles)
+                    {
+                        <option value="@salle.Value">@salle.Text</option>
+                    }
+                </select>
+                <select id="capacityFilter" class="form-select form-select-sm" style="min-width: 150px;">
+                    <option value="0">Capacité</option>
+                    <option value="20">≥ 20 pers.</option>
+                    <option value="40">≥ 40 pers.</option>
+                    <option value="60">≥ 60 pers.</option>
+                </select>
+                <div class="form-check form-switch mb-0">
+                    <input class="form-check-input" type="checkbox" id="availableNow" />
+                    <label class="form-check-label small" for="availableNow">Disponible maintenant</label>
                 </div>
             </div>
         </div>
-    </div>
+
+        <div class="row gy-3 mb-4">
+            <div class="col-md-4">
+                <div class="stats-card">
+                    <div class="stat-label">Séances programmées</div>
+                    <div class="stat-value" id="seancesTotal">0</div>
+                    <small class="text-muted">Nombre total de séances planifiées.</small>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stats-card">
+                    <div class="stat-label">Jour le plus chargé</div>
+                    <div class="stat-value" id="seancesBusiestDay">Aucun</div>
+                    <small class="text-muted">Le jour le plus utilisé dans l’emploi du temps.</small>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stats-card">
+                    <div class="stat-label">Salle la plus utilisée</div>
+                    <div class="stat-value" id="seancesTopRoom">Aucune</div>
+                    <small class="text-muted">Salle avec le plus de séances.</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="text-muted">Glissez-déposez une séance pour mettre à jour son horaire en temps réel.</div>
+                <button id="exportPdfBtn" class="btn btn-success btn-sm">💾 Télécharger PDF</button>
+            </div>
+            <div id="calendarView">
+                <div id="calendar"></div>
+            </div>
+            <div id="tableView" class="d-none">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>Jour</th>
+                                <th>Horaire</th>
+                                <th>Cours</th>
+                                <th>Enseignant</th>
+                                <th>Salle</th>
+                            </tr>
+                        </thead>
+                        <tbody id="eventsTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
 </div>
 
 <!-- FullCalendar (optionnel pour vue calendrier) -->
 <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet" />
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.5.25/dist/jspdf.plugin.autotable.min.js"></script>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Vérifier que FullCalendar est disponible
-        if (typeof FullCalendar === 'undefined') {
-            console.warn('FullCalendar pas disponible. Utilisation du mode tableau.');
-            return;
-        }
+        (function(){
+            const pageSize = 10; let page = 1;
+            const searchInput = document.getElementById('searchInput');
+            const jourSelect = document.getElementById('jourSelect');
+            const enseignantSelect = document.getElementById('enseignantSelect');
+            const salleSelect = document.getElementById('salleSelect');
+            const capacityFilter = document.getElementById('capacityFilter');
+            const availableNowToggle = document.getElementById('availableNow');
+            const exportPdfBtn = document.getElementById('exportPdfBtn');
+            const totalDisplay = document.getElementById('seancesTotal');
+            const busiestDayDisplay = document.getElementById('seancesBusiestDay');
+            const topRoomDisplay = document.getElementById('seancesTopRoom');
 
-        // Mode calendrier optionnel (tu peux ajouter un bouton pour basculer)
-        console.log('FullCalendar est chargé et prêt.');
-    });
+            let calendar;
+            async function initCalendar(){
+                const calendarEl = document.getElementById('calendar');
+                calendar = new FullCalendar.Calendar(calendarEl, {
+                    initialView: 'timeGridWeek',
+                    nowIndicator: true,
+                    editable: true,
+                    selectable: true,
+                    slotMinTime: '07:00:00',
+                    slotMaxTime: '21:00:00',
+                    headerToolbar: {
+                        left: 'prev,next today',
+                        center: 'title',
+                        right: 'timeGridWeek,timeGridDay'
+                    },
+                    events: getEventsUrl(),
+                    eventDrop: async function(info) {
+                        const ev = info.event;
+                        const payload = { id: parseInt(ev.id), start: ev.start.toISOString(), end: ev.end ? ev.end.toISOString() : ev.start.toISOString() };
+                        try {
+                            const res = await fetch('/Seances/UpdateEvent', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                            if (!res.ok) {
+                                info.revert();
+                                alert('Impossible de déplacer la séance.');
+                            }
+                        } catch (e) { info.revert(); console.error(e); }
+                    },
+                    eventClick: function(info) {
+                        window.location.href = '/Seances/Edit/' + info.event.id;
+                    }
+                });
+                calendar.render();
+            }
+
+            function getEventsUrl() {
+                const q = encodeURIComponent(searchInput.value || '');
+                const jour = encodeURIComponent(jourSelect.value || '');
+                const enseignantId = encodeURIComponent(enseignantSelect.value || '');
+                const salleId = encodeURIComponent(salleSelect.value || '');
+                const minCapacity = encodeURIComponent(capacityFilter.value || '0');
+                const availableNow = availableNowToggle.checked ? 'true' : 'false';
+                return `/Seances/Events?q=${q}&jour=${jour}&enseignantId=${enseignantId}&salleId=${salleId}&minCapacity=${minCapacity}&availableNow=${availableNow}`;
+            }
+
+            function refreshCalendar() {
+                if (calendar) {
+                    calendar.setOption('events', getEventsUrl());
+                    calendar.refetchEvents();
+                }
+                if (tableViewActive) loadTableView();
+            }
+
+            let tableViewActive = false;
+            function setView(view) {
+                tableViewActive = view === 'table';
+                document.getElementById('calendarView').classList.toggle('d-none', tableViewActive);
+                document.getElementById('tableView').classList.toggle('d-none', !tableViewActive);
+                document.getElementById('calendarViewBtn').classList.toggle('btn-add', !tableViewActive);
+                document.getElementById('calendarViewBtn').classList.toggle('btn-soft-secondary', tableViewActive);
+                document.getElementById('tableViewBtn').classList.toggle('btn-add', tableViewActive);
+                document.getElementById('tableViewBtn').classList.toggle('btn-soft-secondary', !tableViewActive);
+                if (tableViewActive) loadTableView();
+            }
+
+            async function loadTableView() {
+                const q = encodeURIComponent(searchInput.value || '');
+                const jour = encodeURIComponent(jourSelect.value || '');
+                const enseignantId = encodeURIComponent(enseignantSelect.value || '');
+                const salleId = encodeURIComponent(salleSelect.value || '');
+                const minCapacity = encodeURIComponent(capacityFilter.value || '0');
+                const availableNow = availableNowToggle.checked ? 'true' : 'false';
+                const res = await fetch(`/Seances/ListJson?q=${q}&jour=${jour}&enseignantId=${enseignantId}&salleId=${salleId}&minCapacity=${minCapacity}&availableNow=${availableNow}&page=1&pageSize=500`);
+                const data = await res.json();
+                const tbody = document.getElementById('eventsTableBody');
+                tbody.innerHTML = data.items.map(item => `<tr><td>${item.jour}</td><td>${item.heureDebut} - ${item.heureFin}</td><td>${item.cours}</td><td>${item.enseignant}</td><td>${item.salle}</td></tr>`).join('');
+            }
+
+            async function loadSummary() {
+                const res = await fetch('/Seances/SummaryJson');
+                const summary = await res.json();
+                totalDisplay.textContent = summary.total;
+                busiestDayDisplay.textContent = summary.busiestDay ? `${summary.busiestDay.jour} (${summary.busiestDay.count})` : 'Aucun';
+                topRoomDisplay.textContent = summary.topRoom || 'Aucune';
+            }
+
+            const refreshBtn = document.getElementById('refreshBtn');
+            refreshBtn.addEventListener('click', () => { refreshCalendar(); loadSummary(); });
+            searchInput.addEventListener('input', () => setTimeout(() => refreshCalendar(), 300));
+            jourSelect.addEventListener('change', () => refreshCalendar());
+            enseignantSelect.addEventListener('change', () => refreshCalendar());
+            salleSelect.addEventListener('change', () => refreshCalendar());
+            capacityFilter.addEventListener('change', () => refreshCalendar());
+            availableNowToggle.addEventListener('change', () => refreshCalendar());
+            document.getElementById('calendarViewBtn').addEventListener('click', () => setView('calendar'));
+            document.getElementById('tableViewBtn').addEventListener('click', () => setView('table'));
+            exportPdfBtn.addEventListener('click', async () => {
+                const q = encodeURIComponent(searchInput.value || '');
+                const jour = encodeURIComponent(jourSelect.value || '');
+                const enseignantId = encodeURIComponent(enseignantSelect.value || '');
+                const salleId = encodeURIComponent(salleSelect.value || '');
+                const minCapacity = encodeURIComponent(capacityFilter.value || '0');
+                const availableNow = availableNowToggle.checked ? 'true' : 'false';
+                const res = await fetch(`/Seances/ListJson?q=${q}&jour=${jour}&enseignantId=${enseignantId}&salleId=${salleId}&minCapacity=${minCapacity}&availableNow=${availableNow}&page=1&pageSize=500`);
+                const data = await res.json();
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF({ orientation: 'landscape' });
+                doc.setFontSize(16);
+                doc.text('Emploi du temps', 14, 20);
+                doc.setFontSize(11);
+                doc.text(`Filtres: ${jour || 'Tous les jours'} / ${enseignantSelect.options[enseignantSelect.selectedIndex].text} / ${salleSelect.options[salleSelect.selectedIndex].text}`, 14, 30);
+                const rows = data.items.map(item => [item.jour, `${item.heureDebut} - ${item.heureFin}`, item.cours, item.enseignant, item.salle]);
+                doc.autoTable({
+                    head: [['Jour', 'Horaire', 'Cours', 'Enseignant', 'Salle']],
+                    body: rows,
+                    startY: 40,
+                    styles: { fontSize: 9, cellPadding: 3 }
+                });
+                doc.save('emploi_du_temps.pdf');
+            });
+            document.addEventListener('DOMContentLoaded', () => { initCalendar(); loadSummary(); });
+        })();
 </script>

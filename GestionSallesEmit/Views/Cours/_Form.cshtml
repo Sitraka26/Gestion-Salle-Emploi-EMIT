@@ -1,0 +1,21 @@
+@model GestionSallesEmit.Models.Cours
+<form asp-action="Create" method="post" id="coursForm">
+    <div class="mb-3">
+        <label asp-for="NomCours" class="form-label">Nom du Cours</label>
+        <input asp-for="NomCours" class="form-control" />
+        <span asp-validation-for="NomCours" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Credit" class="form-label">Crédits</label>
+        <input asp-for="Credit" type="number" class="form-control" />
+        <span asp-validation-for="Credit" class="text-danger"></span>
+    </div>
+    <div class="d-flex justify-content-end">
+        <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">Annuler</button>
+        <button type="submit" class="btn btn-primary">Enregistrer</button>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

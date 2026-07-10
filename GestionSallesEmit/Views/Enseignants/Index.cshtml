@@ -1,17 +1,168 @@
-@model IEnumerable<GestionSallesEmit.Models.Enseignant>
+@{
+    ViewData["Title"] = "Enseignants";
+}
+
 <div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h1 class="text-primary">Gestion des Enseignants</h1>
-        <a asp-action="Create" class="btn btn-success">➕ Ajouter un Enseignant</a>
-    </div>
-    <table class="table table-bordered table-striped">
-        <thead class="table-dark">
-            <tr><th>Nom</th><th>Prénom</th><th>Email</th></tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model) {
-                <tr><td>@item.Nom</td><td>@item.Prenom</td><td>@item.Email</td></tr>
-            }
-        </tbody>
-    </table>
+    <section class="page-header">
+        <div>
+            <p class="text-uppercase text-primary small mb-2">Enseignants</p>
+            <h1 class="page-title">Une vision organisée des professeurs</h1>
+            <p class="page-description">Recherchez, triez et gérez les enseignants dans une interface structurée pensée pour une administration rapide.</p>
+        </div>
+        <div class="page-actions">
+            <a asp-action="Create" class="btn btn-primary btn-lg">➕ Ajouter un enseignant</a>
+            <button id="refreshBtn" class="btn btn-soft-secondary btn-lg">🔄 Rafraîchir</button>
+        </div>
+    </section>
+
+    <section class="section-panel">
+        <div class="row gy-3 mb-4">
+            <div class="col-md-4">
+                <div class="stats-card">
+                    <div class="stat-label">Total enseignants</div>
+                    <div class="stat-value" id="teachersTotal">0</div>
+                    <small class="text-muted">Profs disponibles dans le système.</small>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stats-card">
+                    <div class="stat-label">Enseignants actifs</div>
+                    <div class="stat-value" id="teachersActive">0</div>
+                    <small class="text-muted">Assignés à au moins une séance.</small>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stats-card">
+                    <div class="stat-label">Cours moyen / enseignant</div>
+                    <div class="stat-value" id="teachersAverage">0</div>
+                    <small class="text-muted">Charge moyenne des enseignants.</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="control-toolbar">
+            <div>
+                <h2 class="panel-title">Liste des enseignants</h2>
+                <p class="text-muted mb-0">Suivez les coordonnées et mettez à jour facilement les profils.</p>
+            </div>
+            <div class="d-flex flex-wrap gap-2 align-items-center">
+                <label class="mb-0">Filtrer charge</label>
+                <select id="classFilter" class="form-select d-inline-block w-auto ms-2">
+                    <option value="0">Tous</option>
+                    <option value="2">≥ 2 séances</option>
+                    <option value="4">≥ 4 séances</option>
+                </select>
+                <button id="highlightBusy" class="btn btn-soft-primary btn-sm">Voir les plus chargés</button>
+                <label class="mb-0">Trier par</label>
+                <select id="sortSelect" class="form-select d-inline-block w-auto ms-2">
+                    <option value="name">Nom</option>
+                    <option value="email">Email</option>
+                    <option value="classes">Charge</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="row g-3 mb-4">
+            <div class="col-lg-6">
+                <input id="searchInput" class="form-control" placeholder="Rechercher un enseignant..." />
+            </div>
+        </div>
+
+        <div class="table-card">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle" id="teachersTable">
+                    <thead>
+                        <tr>
+                            <th>Nom</th>
+                            <th>Prénom</th>
+                            <th>Email</th>
+                            <th style="width:120px">Charge</th>
+                            <th style="width:160px">Statut</th>
+                            <th style="width:160px">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="teachersBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <nav>
+        <ul class="pagination" id="pagination"></ul>
+    </nav>
 </div>
+
+@section Scripts {
+    <script>
+        (function(){
+            const pageSize = 8; let page = 1;
+            const searchInput = document.getElementById('searchInput');
+            const sortSelect = document.getElementById('sortSelect');
+            const teachersBody = document.getElementById('teachersBody');
+            const pagination = document.getElementById('pagination');
+
+            function renderRow(t){
+                const status = t.sessionCount >= 4 ? '<span class="status-badge status-badge-primary">Très occupé</span>' : t.sessionCount >= 1 ? '<span class="status-badge status-badge-warning">Actif</span>' : '<span class="status-badge status-badge-secondary">Disponible</span>';
+                return `
+                    <tr>
+                        <td>${t.nom}</td>
+                        <td>${t.prenom}</td>
+                        <td>${t.email}</td>
+                        <td>${t.sessionCount}</td>
+                        <td>${status}</td>
+                        <td>
+                            <a class="btn btn-sm btn-primary me-1" href="/Enseignants/Edit/${t.id}">Modifier</a>
+                            <a class="btn btn-sm btn-danger" href="/Enseignants/Delete/${t.id}">Supprimer</a>
+                        </td>
+                    </tr>`;
+            }
+
+            async function load(){
+                const q = encodeURIComponent(searchInput.value||'');
+                const sort = sortSelect.value;
+                const minClasses = parseInt(classFilter.value, 10) || 0;
+                const res = await fetch(`/Enseignants/ListJson?q=${q}&sort=${sort}&page=${page}&pageSize=${pageSize}&minClasses=${minClasses}`);
+                const data = await res.json();
+                teachersBody.innerHTML = data.items.map(renderRow).join('');
+
+                const total = data.total;
+                const pages = Math.ceil(total/pageSize) || 1;
+                pagination.innerHTML = '';
+                for (let i = 1; i <= pages; i++) {
+                    const li = document.createElement('li');
+                    li.className = 'page-item' + (i === page ? ' active' : '');
+                    li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+                    li.addEventListener('click', e => { e.preventDefault(); page = i; load(); });
+                    pagination.appendChild(li);
+                }
+            }
+
+            const classFilter = document.getElementById('classFilter');
+            const highlightBusy = document.getElementById('highlightBusy');
+            const teachersTotal = document.getElementById('teachersTotal');
+            const teachersActive = document.getElementById('teachersActive');
+            const teachersAverage = document.getElementById('teachersAverage');
+
+            async function loadSummary() {
+                const minClasses = parseInt(classFilter.value, 10) || 0;
+                const res = await fetch(`/Enseignants/SummaryJson?minClasses=${minClasses}`);
+                const summary = await res.json();
+                teachersTotal.textContent = summary.totalTeachers;
+                teachersActive.textContent = summary.activeTeachers;
+                teachersAverage.textContent = summary.averageClasses;
+
+                const busiest = summary.busiestTeacher;
+                if (busiest) {
+                    document.getElementById('teachersAverage').closest('.stats-card').querySelector('small').textContent = `Enseignant le plus chargé: ${busiest.fullName} (${busiest.count})`;
+                }
+            }
+
+            document.getElementById('refreshBtn').addEventListener('click', ()=> { loadSummary(); load(); });
+            highlightBusy.addEventListener('click', ()=> { classFilter.value = '4'; page = 1; loadSummary(); load(); });
+            sortSelect.addEventListener('change', ()=>{ page = 1; load(); });
+            classFilter.addEventListener('change', ()=>{ page = 1; load(); loadSummary(); });
+            let debounce; searchInput.addEventListener('input', ()=>{ clearTimeout(debounce); debounce = setTimeout(()=>{ page = 1; load(); }, 300); });
+            document.addEventListener('DOMContentLoaded', ()=>{ loadSummary(); load(); });
+        })();
+    </script>
+}

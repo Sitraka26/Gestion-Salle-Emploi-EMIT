@@ -27,29 +27,168 @@ public class SeancesController : Controller
             .Include(s => s.Enseignant)
             .Include(s => s.Cours)
             .ToListAsync();
+
+        ViewBag.Enseignants = new SelectList(await _context.Enseignants.OrderBy(e => e.Nom).ThenBy(e => e.Prenom).ToListAsync(), "Id", "Nom");
+        ViewBag.Salles = new SelectList(await _context.Salles.OrderBy(s => s.NomSalle).ToListAsync(), "Id", "NomSalle");
+
         return View(seances);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> ListJson(string q = "", string jour = "", int? enseignantId = null, int? salleId = null, int minCapacity = 0, bool availableNow = false, int page = 1, int pageSize = 10)
+    {
+        var query = _context.Seances.Include(s => s.Salle).Include(s => s.Enseignant).Include(s => s.Cours).AsQueryable();
+        if (!string.IsNullOrWhiteSpace(q)) query = query.Where(s => s.Cours!.NomCours.Contains(q) || s.Enseignant!.Nom.Contains(q) || s.Salle!.NomSalle.Contains(q));
+        if (!string.IsNullOrWhiteSpace(jour)) query = query.Where(s => s.Jour == jour);
+        if (enseignantId.HasValue) query = query.Where(s => s.EnseignantId == enseignantId.Value);
+        if (salleId.HasValue) query = query.Where(s => s.SalleId == salleId.Value);
+        if (minCapacity > 0) query = query.Where(s => s.Salle!.Capacite >= minCapacity);
+
+        var seances = await query.ToListAsync();
+        if (availableNow)
+        {
+            var ci = new System.Globalization.CultureInfo("fr-FR");
+            var todayName = ci.TextInfo.ToTitleCase(DateTime.Now.ToString("dddd", ci));
+            var now = DateTime.Now.TimeOfDay;
+            seances = seances.Where(s => s.Jour == todayName &&
+                TimeSpan.TryParse(s.HeureDebut, out var sd) &&
+                TimeSpan.TryParse(s.HeureFin, out var ed) &&
+                sd <= now && now < ed).ToList();
+        }
+
+        var total = seances.Count;
+        var items = seances.OrderBy(s => s.Jour).ThenBy(s => s.HeureDebut).Skip((page - 1) * pageSize).Take(pageSize)
+            .Select(s => new { s.Id, jour = s.Jour, heureDebut = s.HeureDebut, heureFin = s.HeureFin, cours = s.Cours!.NomCours, enseignant = s.Enseignant!.Nom + " " + s.Enseignant!.Prenom, salle = s.Salle!.NomSalle }).ToList();
+        return Json(new { items, total });
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> SummaryJson()
+    {
+        var total = await _context.Seances.CountAsync();
+        var busiestDay = await _context.Seances
+            .GroupBy(s => s.Jour)
+            .Select(g => new { jour = g.Key, count = g.Count() })
+            .OrderByDescending(g => g.count)
+            .FirstOrDefaultAsync();
+
+        var topTeacher = await _context.Seances
+            .GroupBy(s => s.EnseignantId)
+            .Select(g => new { id = g.Key, count = g.Count() })
+            .OrderByDescending(g => g.count)
+            .FirstOrDefaultAsync();
+
+        var topTeacherName = topTeacher == null ? null : await _context.Enseignants
+            .Where(e => e.Id == topTeacher.id)
+            .Select(e => e.Nom + " " + e.Prenom)
+            .FirstOrDefaultAsync();
+
+        var topRoom = await _context.Seances
+            .GroupBy(s => s.SalleId)
+            .Select(g => new { id = g.Key, count = g.Count() })
+            .OrderByDescending(g => g.count)
+            .FirstOrDefaultAsync();
+
+        var topRoomName = topRoom == null ? null : await _context.Salles
+            .Where(s => s.Id == topRoom.id)
+            .Select(s => s.NomSalle)
+            .FirstOrDefaultAsync();
+
+        return Json(new
+        {
+            total,
+            busiestDay = busiestDay == null ? null : new { busiestDay.jour, busiestDay.count },
+            topTeacher = topTeacherName,
+            topRoom = topRoomName
+        });
     }
 
     // Retourne les séances au format JSON pour FullCalendar
     [HttpGet]
-    public async Task<IActionResult> Events()
+    public async Task<IActionResult> Events(string q = "", string jour = "", int? enseignantId = null, int? salleId = null, int minCapacity = 0, bool availableNow = false)
     {
-        var seances = await _context.Seances
-            .Include(s => s.Salle)
-            .Include(s => s.Enseignant)
-            .Include(s => s.Cours)
-            .ToListAsync();
+        var query = _context.Seances.Include(s => s.Salle).Include(s => s.Enseignant).Include(s => s.Cours).AsQueryable();
+        if (!string.IsNullOrWhiteSpace(q)) query = query.Where(s => s.Cours!.NomCours.Contains(q) || s.Enseignant!.Nom.Contains(q) || s.Salle!.NomSalle.Contains(q));
+        if (!string.IsNullOrWhiteSpace(jour)) query = query.Where(s => s.Jour == jour);
+        if (enseignantId.HasValue) query = query.Where(s => s.EnseignantId == enseignantId.Value);
+        if (salleId.HasValue) query = query.Where(s => s.SalleId == salleId.Value);
+        if (minCapacity > 0) query = query.Where(s => s.Salle!.Capacite >= minCapacity);
 
-        var events = seances.Select(s => new {
-            title = $"{s.Cours?.NomCours} - {s.Enseignant?.Nom} ({s.Salle?.NomSalle})",
-            daysOfWeek = new[] { DayToNumber(s.Jour) },
-            startTime = s.HeureDebut,
-            endTime = s.HeureFin,
-            backgroundColor = "#0d6efd"
+        var seances = await query.ToListAsync();
+        if (availableNow)
+        {
+            var ci = new System.Globalization.CultureInfo("fr-FR");
+            var todayName = ci.TextInfo.ToTitleCase(DateTime.Now.ToString("dddd", ci));
+            var now = DateTime.Now.TimeOfDay;
+            seances = seances.Where(s => s.Jour == todayName &&
+                TimeSpan.TryParse(s.HeureDebut, out var sd) &&
+                TimeSpan.TryParse(s.HeureFin, out var ed) &&
+                sd <= now && now < ed).ToList();
+        }
+
+        // Build events for the current week (so drag/drop can be persisted)
+        var today = DateTime.Today;
+        int diff = (7 + (int)today.DayOfWeek - 1) % 7;
+        var monday = today.AddDays(-diff);
+
+        var events = seances.Select(s => {
+            var dayNum = DayToNumber(s.Jour);
+            int offset = dayNum == 0 ? 6 : (dayNum - 1);
+            var date = monday.AddDays(offset);
+            DateTime startDt, endDt;
+            if (!DateTime.TryParseExact(s.HeureDebut, "HH:mm", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out var sd))
+                sd = DateTime.Today.AddHours(8);
+            if (!DateTime.TryParseExact(s.HeureFin, "HH:mm", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out var ed))
+                ed = sd.AddHours(1);
+            startDt = new DateTime(date.Year, date.Month, date.Day, sd.Hour, sd.Minute, 0);
+            endDt = new DateTime(date.Year, date.Month, date.Day, ed.Hour, ed.Minute, 0);
+
+            return new {
+                id = s.Id,
+                title = $"{s.Cours?.NomCours} - {s.Enseignant?.Nom} ({s.Salle?.NomSalle})",
+                start = startDt.ToString("s"),
+                end = endDt.ToString("s"),
+                backgroundColor = "#0d6efd",
+                extendedProps = new { salleId = s.SalleId }
+            };
         });
 
         return Json(events);
     }
+
+    [HttpPost]
+    public async Task<IActionResult> UpdateEvent([FromBody] UpdateEventDto dto)
+    {
+        if (dto == null || dto.Id <= 0) return BadRequest();
+        var seance = await _context.Seances.FindAsync(dto.Id);
+        if (seance == null) return NotFound();
+
+        // parse start/end datetimes to extract day name and time
+        if (!DateTime.TryParse(dto.Start, out var startDt) || !DateTime.TryParse(dto.End, out var endDt))
+            return BadRequest("Invalid dates");
+
+        seance.Jour = startDt.ToString("dddd", System.Globalization.CultureInfo.CurrentCulture).ToString();
+        seance.HeureDebut = startDt.ToString("HH:mm");
+        seance.HeureFin = endDt.ToString("HH:mm");
+
+        _context.Update(seance);
+        await _context.SaveChangesAsync();
+
+        // notify clients
+        await _hubContext.Clients.All.SendAsync("SeanceUpdated", new {
+            id = seance.Id,
+            jour = seance.Jour,
+            heureDebut = seance.HeureDebut,
+            heureFin = seance.HeureFin,
+            salleId = seance.SalleId,
+            enseignantId = seance.EnseignantId,
+            coursId = seance.CoursId
+        });
+
+        return Json(new { success = true });
+    }
+
+    public class UpdateEventDto { public int Id { get; set; } public string Start { get; set; } = ""; public string End { get; set; } = ""; }
 
     // Formulaire de planification (optionnellement prérempli via query string)
     public IActionResult Create(string? jour = null, string? debut = null, string? fin = null)

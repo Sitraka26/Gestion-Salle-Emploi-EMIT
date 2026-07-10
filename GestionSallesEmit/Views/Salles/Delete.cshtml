@@ -1,0 +1,20 @@
+@model GestionSallesEmit.Models.Salle
+@{
+    ViewData["Title"] = "Supprimer Salle";
+}
+
+<div class="container mt-4">
+    <h2>Supprimer la salle</h2>
+    <div class="card mb-3">
+        <div class="card-body">
+            <h5 class="card-title">@Model.NomSalle</h5>
+            <p class="card-text">Capacité : @Model.Capacite</p>
+        </div>
+    </div>
+
+    <form asp-action="Delete" method="post">
+        <input type="hidden" asp-for="Id" />
+        <button type="submit" class="btn btn-danger">Confirmer la suppression</button>
+        <a asp-action="Index" class="btn btn-secondary">Annuler</a>
+    </form>
+</div>

@@ -1,0 +1,29 @@
+@model GestionSallesEmit.Models.Salle
+@{
+    ViewData["Title"] = "Modifier Salle";
+}
+
+<div class="container mt-4">
+    <h2>Modifier la salle</h2>
+    <form asp-action="Edit" method="post">
+        <input type="hidden" asp-for="Id" />
+        <div class="mb-3">
+            <label class="form-label">Nom de la salle</label>
+            <input asp-for="NomSalle" class="form-control" />
+            <span asp-validation-for="NomSalle" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Capacité</label>
+            <input asp-for="Capacite" type="number" class="form-control" />
+            <span asp-validation-for="Capacite" class="text-danger"></span>
+        </div>
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">Enregistrer</button>
+            <a asp-action="Index" class="btn btn-secondary">Annuler</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
