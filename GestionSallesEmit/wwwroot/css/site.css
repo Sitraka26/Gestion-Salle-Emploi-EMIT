@@ -274,3 +274,40 @@ a:hover { color: var(--brass-ink); }
 @media (prefers-reduced-motion: reduce) {
   .card, .stats-card, .side-menu-item, .btn { transition: none; }
 }
+/* ==========================================================================
+   Cohérence des pages Salles / Cours / Enseignants (AJAX + table-card)
+   ========================================================================== */
+.table-card {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+.table-card .table-responsive { border-radius: 0; }
+.table-card .table { border-radius: 0; margin-bottom: 0; }
+
+.stat-sub { font-family: var(--font-mono); font-size: 0.8rem; color: var(--brass-ink); font-weight: 600; }
+
+/* Filtres / toolbar au-dessus des tableaux */
+.control-toolbar select.form-select,
+.control-toolbar .btn { height: 2.5rem; }
+.control-toolbar label { color: var(--ink-soft); font-weight: 600; font-size: 0.85rem; }
+
+/* Pagination */
+.pagination { gap: 0.35rem; }
+.page-link {
+  border: 1px solid var(--rule-strong);
+  color: var(--ink);
+  border-radius: var(--radius-sm) !important;
+  font-family: var(--font-mono);
+  font-weight: 600;
+}
+.page-link:hover { background: var(--brass-soft); color: var(--brass-ink); border-color: var(--brass); }
+.page-item.active .page-link { background: var(--gradient-brand); border-color: var(--ink); color: #fff; }
+
+td .status-badge { display: inline-block; }
+
+/* Sécurité anti-débordement horizontal */
+body { overflow-x: hidden; }
+.dashboard-page, .dashboard-side-panel { min-width: 0; }
