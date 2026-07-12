@@ -427,3 +427,59 @@ canvas {
   color: #fff !important;
   border-color: var(--brass) !important;
 }
+/* ==========================================================================
+   CORRECTIF — menu qui chevauche la barre du haut + trop étroit
+   + vraie couleur contrastante (ambre) pour un effet plus vif
+   ========================================================================== */
+
+.dashboard-side-panel {
+  position: static !important;
+  top: auto !important;
+}
+.dashboard-page {
+  grid-template-columns: 1fr 360px !important;
+}
+@media (max-width: 991px) {
+  .dashboard-page { grid-template-columns: 1fr !important; }
+}
+
+.app-header {
+  z-index: 1030 !important;
+}
+
+.dashboard-side-panel {
+  padding: 1.75rem !important;
+}
+.side-menu-item {
+  padding: 1rem 1.15rem !important;
+  font-size: 1.02rem !important;
+}
+
+/* ---- Couleur complémentaire ambre : contraste fort avec le bleu ---- */
+:root {
+  --accent-warm: #F59E0B;
+  --accent-warm-ink: #92400E;
+  --accent-warm-soft: #FEF3C7;
+}
+
+.btn-warning {
+  background: var(--accent-warm) !important;
+  color: #3A2506 !important;
+  box-shadow: 0 4px 14px -4px rgba(245, 158, 11, 0.55) !important;
+}
+.btn-outline-warning {
+  color: var(--accent-warm-ink) !important;
+  border-color: var(--accent-warm) !important;
+}
+.btn-outline-warning:hover {
+  background: var(--accent-warm) !important;
+  color: #3A2506 !important;
+}
+.badge-glow {
+  background: var(--accent-warm-soft) !important;
+  color: var(--accent-warm-ink) !important;
+  border-color: var(--accent-warm) !important;
+}
+.stats-card:nth-child(4n+3) { border-top-color: var(--accent-warm) !important; }
+
+.brand-mark::after { border-color: var(--accent-warm) !important; }
