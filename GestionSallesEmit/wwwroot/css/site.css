@@ -560,3 +560,37 @@ canvas {
   .btn-primary, .btn-gradient { animation: none; }
   .btn::before { display: none; }
 }
+/* ==========================================================================
+   Corrige l'espace vide en bas du menu + élargit les cartes stats
+   + fond de page plus riche
+   ========================================================================== */
+
+.side-action-list { display: none !important; }
+.dashboard-side-panel {
+  align-self: start !important;
+  height: fit-content !important;
+  padding-bottom: 1.75rem !important;
+}
+.side-menu { margin-bottom: 0 !important; }
+
+.stats-grid {
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)) !important;
+}
+.stats-card {
+  padding: 1.5rem 1.75rem !important;
+}
+.stat-value { font-size: 2.4rem !important; }
+
+/* ---- Fond de page : dégradé doux au lieu du blanc plat ---- */
+body {
+  background:
+    radial-gradient(circle at 10% 0%, rgba(14, 165, 233, 0.10) 0%, transparent 45%),
+    radial-gradient(circle at 95% 10%, rgba(245, 158, 11, 0.08) 0%, transparent 40%),
+    radial-gradient(circle at 50% 100%, rgba(11, 76, 140, 0.08) 0%, transparent 50%),
+    linear-gradient(180deg, #EAF4FD 0%, #F2F9FF 100%) !important;
+  background-attachment: fixed !important;
+}
+
+.card, .section-panel, .stats-card, .table-card {
+  background: linear-gradient(180deg, #FFFFFF 0%, #FAFDFF 100%) !important;
+}
