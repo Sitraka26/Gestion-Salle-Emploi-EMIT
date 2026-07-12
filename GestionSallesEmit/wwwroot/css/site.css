@@ -311,3 +311,60 @@ td .status-badge { display: inline-block; }
 /* Sécurité anti-débordement horizontal */
 body { overflow-x: hidden; }
 .dashboard-page, .dashboard-side-panel { min-width: 0; }
+.page-header::before { pointer-events: none; }
+/* ==========================================================================
+   CORRECTIF FINAL — neutralise tout étirement/blocage sur le Dashboard
+   (ces règles priment sur tout ce qui précède)
+   ========================================================================== */
+.page-header::before { content: none !important; }
+
+.dashboard-page {
+  display: block !important;
+}
+.dashboard-page-content {
+  display: block !important;
+  width: 100% !important;
+}
+.dashboard-side-panel {
+  position: static !important;
+  max-height: none !important;
+  width: 100% !important;
+  margin-top: 1.75rem;
+}
+
+.page-header,
+.stats-card,
+.section-panel,
+.card {
+  height: auto !important;
+  max-height: none !important;
+  min-height: 0 !important;
+}
+
+.stats-grid {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 1rem !important;
+}
+.stats-grid > * {
+  flex: 1 1 220px !important;
+}
+
+.page-header, .card, .stats-card, .section-panel, .btn, a {
+  pointer-events: auto !important;
+}
+/* ==========================================================================
+   CORRECTIF — Le graphique Chart.js du dashboard s'étirait sans limite
+   ========================================================================== */
+canvas {
+  max-height: 320px !important;
+  height: 320px !important;
+  width: 100% !important;
+}
+.section-panel:has(canvas),
+.card:has(canvas) {
+  position: relative;
+  height: 360px !important;
+  max-height: 360px !important;
+  overflow: hidden;
+}
