@@ -368,3 +368,62 @@ canvas {
   max-height: 360px !important;
   overflow: hidden;
 }
+/* ==========================================================================
+   Dashboard : sidebar à droite (propre, sans bug) + couleurs plus vives
+   ========================================================================== */
+.dashboard-page {
+  display: grid !important;
+  grid-template-columns: 1fr 300px !important;
+  gap: 1.75rem !important;
+  align-items: start !important;
+}
+.dashboard-page-content { width: auto !important; }
+.dashboard-side-panel {
+  position: sticky !important;
+  top: 5.5rem !important;
+  align-self: start !important;
+  width: auto !important;
+  margin-top: 0 !important;
+  max-height: none !important;
+}
+@media (max-width: 991px) {
+  .dashboard-page { grid-template-columns: 1fr !important; }
+  .dashboard-side-panel { position: static !important; }
+}
+
+/* ---- Couleurs plus vives et contrastées ---- */
+:root {
+  --brass: #0EA5E9;
+  --brass-ink: #0369A1;
+  --brass-soft: #E0F2FE;
+  --gradient-brand: linear-gradient(120deg, #072A52 0%, #0B4C8C 45%, #0EA5E9 100%);
+}
+
+.stats-card {
+  border-top: 4px solid var(--brass) !important;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.stats-card:hover {
+  transform: translateY(-4px) !important;
+  box-shadow: 0 10px 24px -8px rgba(14, 165, 233, 0.45) !important;
+}
+.stats-card:nth-child(4n+1) { border-top-color: #0EA5E9 !important; }
+.stats-card:nth-child(4n+2) { border-top-color: #2563EB !important; }
+.stats-card:nth-child(4n+3) { border-top-color: #0891B2 !important; }
+.stats-card:nth-child(4n+4) { border-top-color: #7C3AED !important; }
+
+.stat-value { color: var(--ink) !important; font-weight: 700 !important; }
+
+.page-header {
+  box-shadow: 0 16px 40px -14px rgba(14, 165, 233, 0.5) !important;
+}
+
+.side-menu-item {
+  background: rgba(14, 165, 233, 0.1) !important;
+  border: 1px solid rgba(14, 165, 233, 0.25) !important;
+}
+.side-menu-item:hover {
+  background: var(--brass) !important;
+  color: #fff !important;
+  border-color: var(--brass) !important;
+}
