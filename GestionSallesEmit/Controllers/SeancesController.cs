@@ -5,6 +5,9 @@ using Microsoft.AspNetCore.SignalR;
 using GestionSallesEmit.Data;
 using GestionSallesEmit.Models;
 using GestionSallesEmit.Hubs;
+using QuestPDF.Fluent;
+using QuestPDF.Infrastructure;
+using QuestPDF.Helpers;
 
 namespace GestionSallesEmit.Controllers;
 
@@ -19,7 +22,6 @@ public class SeancesController : Controller
         _hubContext = hubContext;
     }
 
-    // Affichage de l'emploi du temps (Données pour le calendrier)
     public async Task<IActionResult> Index()
     {
         var seances = await _context.Seances
@@ -103,7 +105,6 @@ public class SeancesController : Controller
         });
     }
 
-    // Retourne les séances au format JSON pour FullCalendar
     [HttpGet]
     public async Task<IActionResult> Events(string q = "", string jour = "", int? enseignantId = null, int? salleId = null, int minCapacity = 0, bool availableNow = false)
     {
@@ -126,7 +127,6 @@ public class SeancesController : Controller
                 sd <= now && now < ed).ToList();
         }
 
-        // Build events for the current week (so drag/drop can be persisted)
         var today = DateTime.Today;
         int diff = (7 + (int)today.DayOfWeek - 1) % 7;
         var monday = today.AddDays(-diff);
@@ -163,7 +163,6 @@ public class SeancesController : Controller
         var seance = await _context.Seances.FindAsync(dto.Id);
         if (seance == null) return NotFound();
 
-        // parse start/end datetimes to extract day name and time
         if (!DateTime.TryParse(dto.Start, out var startDt) || !DateTime.TryParse(dto.End, out var endDt))
             return BadRequest("Invalid dates");
 
@@ -174,7 +173,6 @@ public class SeancesController : Controller
         _context.Update(seance);
         await _context.SaveChangesAsync();
 
-        // notify clients
         await _hubContext.Clients.All.SendAsync("SeanceUpdated", new {
             id = seance.Id,
             jour = seance.Jour,
@@ -190,7 +188,6 @@ public class SeancesController : Controller
 
     public class UpdateEventDto { public int Id { get; set; } public string Start { get; set; } = ""; public string End { get; set; } = ""; }
 
-    // Formulaire de planification (optionnellement prérempli via query string)
     public IActionResult Create(string? jour = null, string? debut = null, string? fin = null)
     {
         ViewBag.Salles = new SelectList(_context.Salles, "Id", "NomSalle");
@@ -205,12 +202,10 @@ public class SeancesController : Controller
         return View(model);
     }
 
-    // Enregistrement sécurisé avec gestion des conflits
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(Seance seance)
     {
-        // Vérification si la salle OU l'enseignant est déjà pris au même moment le même jour
         var conflit = await _context.Seances
             .AnyAsync(s => s.Jour == seance.Jour 
                         && s.HeureDebut == seance.HeureDebut 
@@ -228,7 +223,6 @@ public class SeancesController : Controller
         _context.Add(seance);
         await _context.SaveChangesAsync();
 
-        // Notifier les clients connectés
         await _hubContext.Clients.All.SendAsync("SeanceCreated", new {
             id = seance.Id,
             jour = seance.Jour,
@@ -239,6 +233,141 @@ public class SeancesController : Controller
             coursId = seance.CoursId
         });
 
+        return RedirectToAction(nameof(Index));
+    }
+
+    // Génère l'emploi du temps complet en PDF
+    [HttpGet]
+    public async Task<IActionResult> ExportPdf()
+    {
+        QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
+
+        var seances = await _context.Seances
+            .Include(s => s.Salle).Include(s => s.Enseignant).Include(s => s.Cours)
+            .ToListAsync();
+
+        var joursOrdre = new[] { "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche" };
+        var seancesTriees = seances
+            .OrderBy(s => Array.IndexOf(joursOrdre, s.Jour))
+            .ThenBy(s => s.HeureDebut)
+            .ToList();
+
+        var document = QuestPDF.Fluent.Document.Create(container =>
+        {
+            container.Page(page =>
+            {
+                page.Size(QuestPDF.Helpers.PageSizes.A4.Landscape());
+                page.Margin(30);
+                page.DefaultTextStyle(x => x.FontSize(10));
+
+                page.Header().Column(col =>
+                {
+                    col.Item().Text("Emploi du Temps - EMIT").FontSize(20).Bold().FontColor("#0A2E52");
+                    col.Item().Text($"Généré le {DateTime.Now:dd/MM/yyyy à HH:mm}").FontSize(9).FontColor("#5B6B7A");
+                });
+
+                page.Content().PaddingTop(15).Table(table =>
+                {
+                    table.ColumnsDefinition(columns =>
+                    {
+                        columns.RelativeColumn(1);
+                        columns.RelativeColumn(1.4f);
+                        columns.RelativeColumn(2);
+                        columns.RelativeColumn(2);
+                        columns.RelativeColumn(1.4f);
+                    });
+
+                    table.Header(header =>
+                    {
+                        string[] titres = { "Jour", "Horaire", "Cours", "Enseignant", "Salle" };
+                        foreach (var titre in titres)
+                        {
+                            header.Cell().Background("#0A2E52").Padding(6).Text(titre).FontColor("#fff").Bold();
+                        }
+                    });
+
+                    foreach (var s in seancesTriees)
+                    {
+                        table.Cell().Padding(6).BorderBottom(1).BorderColor("#DDDDDD").Text(s.Jour);
+                        table.Cell().Padding(6).BorderBottom(1).BorderColor("#DDDDDD").Text($"{s.HeureDebut} - {s.HeureFin}");
+                        table.Cell().Padding(6).BorderBottom(1).BorderColor("#DDDDDD").Text(s.Cours?.NomCours ?? "-");
+                        table.Cell().Padding(6).BorderBottom(1).BorderColor("#DDDDDD").Text($"{s.Enseignant?.Nom} {s.Enseignant?.Prenom}");
+                        table.Cell().Padding(6).BorderBottom(1).BorderColor("#DDDDDD").Text(s.Salle?.NomSalle ?? "-");
+                    }
+                });
+
+                page.Footer().AlignCenter().Text("GestionSallesEmit").FontSize(8).FontColor("#5B6B7A");
+            });
+        });
+
+        var pdfBytes = document.GeneratePdf();
+        return File(pdfBytes, "application/pdf", "EmploiDuTemps_EMIT.pdf");
+    }
+
+    public async Task<IActionResult> Edit(int? id)
+    {
+        if (id == null) return NotFound();
+        var seance = await _context.Seances.FindAsync(id);
+        if (seance == null) return NotFound();
+
+        ViewBag.Salles = new SelectList(_context.Salles, "Id", "NomSalle", seance.SalleId);
+        ViewBag.Enseignants = new SelectList(_context.Enseignants, "Id", "Nom", seance.EnseignantId);
+        ViewBag.Cours = new SelectList(_context.Cours, "Id", "NomCours", seance.CoursId);
+        return View(seance);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(int id, Seance seance)
+    {
+        if (id != seance.Id) return NotFound();
+
+        var conflit = await _context.Seances
+            .AnyAsync(s => s.Id != seance.Id && s.Jour == seance.Jour && s.HeureDebut == seance.HeureDebut
+                        && (s.SalleId == seance.SalleId || s.EnseignantId == seance.EnseignantId));
+
+        if (conflit)
+        {
+            ModelState.AddModelError("", "🚨 Alerte Conflit : la salle ou l'enseignant est déjà pris sur ce créneau !");
+        }
+
+        if (ModelState.IsValid && !conflit)
+        {
+            _context.Update(seance);
+            await _context.SaveChangesAsync();
+            await _hubContext.Clients.All.SendAsync("SeanceUpdated", new { id = seance.Id, jour = seance.Jour, heureDebut = seance.HeureDebut, heureFin = seance.HeureFin });
+            TempData["SuccessMessage"] = "Séance modifiée avec succès.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        ViewBag.Salles = new SelectList(_context.Salles, "Id", "NomSalle", seance.SalleId);
+        ViewBag.Enseignants = new SelectList(_context.Enseignants, "Id", "Nom", seance.EnseignantId);
+        ViewBag.Cours = new SelectList(_context.Cours, "Id", "NomCours", seance.CoursId);
+        return View(seance);
+    }
+
+    public async Task<IActionResult> Delete(int? id)
+    {
+        if (id == null) return NotFound();
+        var seance = await _context.Seances
+            .Include(s => s.Salle).Include(s => s.Enseignant).Include(s => s.Cours)
+            .FirstOrDefaultAsync(m => m.Id == id);
+        if (seance == null) return NotFound();
+        return View(seance);
+    }
+
+    [HttpPost, ActionName("Delete")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteConfirmed(int id)
+    {
+        var seance = await _context.Seances.FindAsync(id);
+        if (seance != null)
+        {
+            _context.Seances.Remove(seance);
+            await _context.SaveChangesAsync();
+            await _hubContext.Clients.All.SendAsync("SeanceDeleted", new { id });
+            TempData["SuccessMessage"] = "Séance supprimée.";
+        }
         return RedirectToAction(nameof(Index));
     }
 

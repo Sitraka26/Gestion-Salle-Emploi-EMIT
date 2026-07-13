@@ -594,3 +594,72 @@ body {
 .card, .section-panel, .stats-card, .table-card {
   background: linear-gradient(180deg, #FFFFFF 0%, #FAFDFF 100%) !important;
 }
+/* ==========================================================================
+   CORRECTIF DÉFINITIF — menu latéral : chaque bouton a son propre fond
+   plein, donc plus jamais de texte invisible
+   ========================================================================== */
+.dashboard-side-panel {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  height: auto !important;
+  overflow: visible !important;
+}
+.side-panel-head {
+  background: var(--gradient-brand);
+  padding: 1.5rem 1.5rem 1.25rem;
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+.side-panel-head .text-primary,
+.side-panel-head .h4 {
+  color: #fff !important;
+}
+.side-menu {
+  background: var(--ink);
+  padding: 1rem;
+  border-radius: 0 0 var(--radius) var(--radius);
+  box-shadow: var(--shadow-card);
+}
+
+.side-menu-item {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #fff !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  margin-bottom: 0.5rem !important;
+}
+.side-menu-item:last-child { margin-bottom: 0 !important; }
+.side-menu-item .menu-text { color: #fff !important; }
+.side-menu-item:hover {
+  background: var(--brass) !important;
+  border-color: var(--brass) !important;
+}
+/* ==========================================================================
+   SOLUTION FINALE — Menu en bandeau horizontal (plus d'espace vide possible)
+   ========================================================================== */
+.dashboard-page {
+  display: flex !important;
+  flex-direction: column !important;
+}
+.dashboard-page-content { order: 2 !important; width: 100% !important; }
+.dashboard-side-panel {
+  order: 1 !important;
+  width: 100% !important;
+  margin-bottom: 1.75rem !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  gap: 1.25rem !important;
+}
+.side-panel-head { margin: 0 !important; flex: 0 0 auto; }
+.side-menu {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 0.6rem !important;
+  flex: 1 1 auto;
+}
+.side-menu-item {
+  flex: 0 1 auto !important;
+  margin-bottom: 0 !important;
+  padding: 0.65rem 1rem !important;
+}
