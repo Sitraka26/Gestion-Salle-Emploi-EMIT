@@ -21,4 +21,5 @@ public class Enseignant
     [EmailAddress(ErrorMessage = "L'adresse email n'est pas valide.")]
     [StringLength(100, ErrorMessage = "L'email ne peut pas dépasser 100 caractères.")]
     public string Email { get; set; } = string.Empty;
+    public ICollection<Indisponibilite> Indisponibilites { get; set; } = new List<Indisponibilite>();
 }
