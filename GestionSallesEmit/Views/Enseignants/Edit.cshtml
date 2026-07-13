@@ -26,10 +26,9 @@
             <button type="submit" class="btn btn-primary">Enregistrer</button>
             <a asp-action="Index" class="btn btn-secondary">Annuler</a>
         </div>
-    <form asp-action="Edit" method="post" novalidate="novalidate">
     </form>
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <partial name="_ValidationScriptsPartial" />
 }
