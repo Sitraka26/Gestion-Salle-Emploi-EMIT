@@ -663,3 +663,120 @@ body {
   margin-bottom: 0 !important;
   padding: 0.65rem 1rem !important;
 }
+/* ==========================================================================
+   Polish des barres de filtres (Salles / Cours / Enseignants / Séances)
+   ========================================================================== */
+.control-toolbar {
+  background: rgba(14, 165, 233, 0.05);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+}
+.control-toolbar label {
+  background: var(--ink);
+  color: #fff !important;
+  font-size: 0.72rem !important;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.45rem 0.75rem;
+  border-radius: 999px;
+  font-weight: 700 !important;
+  white-space: nowrap;
+}
+.control-toolbar select.form-select {
+  height: 2.4rem !important;
+  border-radius: 999px !important;
+  padding: 0 1rem !important;
+  font-size: 0.9rem;
+}
+.control-toolbar .btn.btn-sm {
+  height: 2.4rem !important;
+  border-radius: 999px !important;
+  padding: 0 1rem !important;
+}
+.control-toolbar .btn-soft-primary.active,
+.control-toolbar .btn-soft-primary[aria-pressed="true"] {
+  background: var(--brass) !important;
+  color: #fff !important;
+  border-color: var(--brass) !important;
+}
+#searchInput, input[id="searchInput"] {
+  margin-top: 1rem;
+  border-radius: 999px !important;
+  padding: 0.7rem 1.25rem !important;
+}
+
+/* ==========================================================================
+   Dashboard : suppression du menu bleu en double, couleur sur la vraie
+   barre de navigation du haut à la place
+   ========================================================================== */
+.dashboard-side-panel { display: none !important; }
+.dashboard-page-content { width: 100% !important; }
+
+.app-header {
+  background: var(--gradient-brand) !important;
+  border-bottom: none !important;
+  box-shadow: 0 4px 18px -6px rgba(10, 46, 82, 0.45) !important;
+}
+.app-header .navbar-brand,
+.app-header .nav-link {
+  color: #fff !important;
+}
+.app-header .navbar-brand span:last-child { color: #fff !important; }
+.app-header .nav-link:hover {
+  background: rgba(255, 255, 255, 0.15) !important;
+  color: #fff !important;
+}
+.brand-mark {
+  background: #fff !important;
+  color: var(--ink) !important;
+}
+.brand-mark::after { border-color: rgba(255,255,255,0.6) !important; }
+/* ==========================================================================
+   Boutons d'actions rapides du dashboard : couleurs distinctes par module
+   ========================================================================== */
+.page-header .page-actions .btn {
+  border-radius: 999px !important;
+  font-weight: 700 !important;
+  border: none !important;
+  transition: transform 0.15s ease, box-shadow 0.15s ease !important;
+}
+.page-header .page-actions .btn:hover {
+  transform: translateY(-3px) !important;
+}
+
+.page-header .page-actions .d-flex > a.btn:nth-child(1) {
+  background: #F59E0B !important;
+  color: #3A2506 !important;
+  box-shadow: 0 6px 16px -6px rgba(245, 158, 11, 0.6) !important;
+}
+.page-header .page-actions .d-flex > a.btn:nth-child(1)::before { content: "📚 "; }
+
+.page-header .page-actions .d-flex > a.btn:nth-child(2) {
+  background: #0EA5E9 !important;
+  color: #fff !important;
+  box-shadow: 0 6px 16px -6px rgba(14, 165, 233, 0.6) !important;
+}
+.page-header .page-actions .d-flex > a.btn:nth-child(2)::before { content: "🏫 "; }
+
+.page-header .page-actions .d-flex > a.btn:nth-child(3) {
+  background: #7C3AED !important;
+  color: #fff !important;
+  box-shadow: 0 6px 16px -6px rgba(124, 58, 237, 0.55) !important;
+}
+.page-header .page-actions .d-flex > a.btn:nth-child(3)::before { content: "👨‍🏫 "; }
+
+.page-header .page-actions .d-flex > a.btn:nth-child(4) {
+  background: rgba(255, 255, 255, 0.95) !important;
+  color: #0369A1 !important;
+  box-shadow: 0 6px 16px -6px rgba(0, 0, 0, 0.3) !important;
+}
+.page-header .page-actions .d-flex > a.btn:nth-child(4)::before { content: "🔍 "; }
+
+.page-header .page-actions .d-flex > a.btn:nth-child(5) {
+  background: #0A2E52 !important;
+  color: #fff !important;
+  border: 2px solid #0EA5E9 !important;
+  box-shadow: 0 6px 16px -6px rgba(10, 46, 82, 0.7) !important;
+}
+.page-header .page-actions .d-flex > a.btn:nth-child(5)::before { content: "📆 "; }
