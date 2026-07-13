@@ -12,13 +12,38 @@
                     <option>Lundi</option><option>Mardi</option><option>Mercredi</option>
                     <option>Jeudi</option><option>Vendredi</option><option>Samedi</option>
                 </select>
+                <span asp-validation-for="Jour" class="text-danger"></span>
             </div>
-            <div class="mb-3"><label class="form-label">Heure Début</label><input asp-for="HeureDebut" type="time" class="form-control" required /></div>
-            <div class="mb-3"><label class="form-label">Heure Fin</label><input asp-for="HeureFin" type="time" class="form-control" required /></div>
-            <div class="mb-3"><label class="form-label">Cours</label><select asp-for="CoursId" class="form-select" asp-items="ViewBag.Cours"></select></div>
-            <div class="mb-3"><label class="form-label">Enseignant</label><select asp-for="EnseignantId" class="form-select" asp-items="ViewBag.Enseignants"></select></div>
-            <div class="mb-3"><label class="form-label">Salle</label><select asp-for="SalleId" class="form-select" asp-items="ViewBag.Salles"></select></div>
+            <div class="mb-3">
+                <label class="form-label">Heure Début</label>
+                <input asp-for="HeureDebut" type="time" class="form-control" required />
+                <span asp-validation-for="HeureDebut" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Heure Fin</label>
+                <input asp-for="HeureFin" type="time" class="form-control" required />
+                <span asp-validation-for="HeureFin" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Cours</label>
+                <select asp-for="CoursId" class="form-select" asp-items="ViewBag.Cours"></select>
+                <span asp-validation-for="CoursId" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Enseignant</label>
+                <select asp-for="EnseignantId" class="form-select" asp-items="ViewBag.Enseignants"></select>
+                <span asp-validation-for="EnseignantId" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Salle</label>
+                <select asp-for="SalleId" class="form-select" asp-items="ViewBag.Salles"></select>
+                <span asp-validation-for="SalleId" class="text-danger"></span>
+            </div>
             <div class="d-flex justify-content-between"><a asp-action="Index" class="btn btn-secondary">Retour</a><button type="submit" class="btn btn-warning">Enregistrer</button></div>
         </form>
     </div>
 </div></div></div></div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
