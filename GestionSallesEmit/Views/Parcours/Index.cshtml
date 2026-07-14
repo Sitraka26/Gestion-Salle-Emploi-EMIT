@@ -1,0 +1,26 @@
+@model IEnumerable<GestionSallesEmit.Models.Parcours>
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="text-primary">📘 Parcours</h1>
+        <a asp-action="Create" class="btn btn-success">➕ Ajouter un Parcours</a>
+    </div>
+    @if (TempData["SuccessMessage"] != null) { <div class="alert alert-success">@TempData["SuccessMessage"]</div> }
+    @if (TempData["ErrorMessage"] != null) { <div class="alert alert-danger">@TempData["ErrorMessage"]</div> }
+    <div class="table-card">
+        <table class="table table-hover mb-0">
+            <thead><tr><th>Parcours</th><th>Mention</th><th>Nb. Cours</th><th class="text-center">Actions</th></tr></thead>
+            <tbody>
+                @foreach (var p in Model)
+                {
+                    <tr>
+                        <td><span class="badge bg-primary">@p.NomParcours</span></td>
+                        <td>@p.Mention?.NomMention</td>
+                        <td>@p.Cours.Count</td>
+                        <td class="text-center"><a asp-action="Delete" asp-route-id="@p.Id" class="btn btn-sm btn-outline-danger">🗑️</a></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <a asp-controller="Mentions" asp-action="Index" class="btn btn-soft-primary mt-3">← Voir les Mentions</a>
+</div>
