@@ -9,13 +9,25 @@
                     <form asp-action="Create">
                         <div class="mb-3">
                             <label class="form-label">Nom du Cours</label>
-                            <input asp-for="NomCours" class="form-control" required pattern="[A-Za-zÀ-ÖØ-öø-ÿ\s\-'#+]+" title="Le nom du cours ne doit pas contenir de chiffres." />
+                            <input asp-for="NomCours" class="form-control" required="required" pattern="[A-Za-zÀ-ÖØ-öø-ÿ\s\-'#+]+" title="Le nom du cours ne doit pas contenir de chiffres." />
                             <span asp-validation-for="NomCours" class="text-danger"></span>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Crédits</label>
-                            <input asp-for="Credit" type="number" class="form-control" required />
+                            <input asp-for="Credit" type="number" class="form-control" required="required" />
                             <span asp-validation-for="Credit" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Niveau</label>
+                            <select asp-for="Niveau" class="form-select" asp-items="ViewBag.Niveaux"></select>
+                            <span asp-validation-for="Niveau" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Parcours</label>
+                            <select asp-for="ParcoursId" class="form-select" asp-items="ViewBag.Parcours">
+                                <option value="">-- Aucun / à définir --</option>
+                            </select>
+                            <span asp-validation-for="ParcoursId" class="text-danger"></span>
                         </div>
                         <div class="d-flex justify-content-between"><a asp-action="Index" class="btn btn-secondary">Retour</a><button type="submit" class="btn btn-primary">Enregistrer</button></div>
                     </form>

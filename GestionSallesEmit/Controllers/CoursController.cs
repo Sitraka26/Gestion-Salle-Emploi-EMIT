@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using GestionSallesEmit.Data;
@@ -18,21 +19,29 @@ public class CoursController : Controller
         _hubContext = hubContext;
     }
 
-    public IActionResult Index() => View();
-    public IActionResult Create() => View();
+    private static readonly string[] Niveaux = { "L1", "L2", "L3", "M1", "M2" };
 
-    // Return the course form as a partial for modal usage
+    public IActionResult Index() => View();
+
+    public IActionResult Create()
+    {
+        ViewBag.Parcours = new SelectList(_context.Parcours, "Id", "NomParcours");
+        ViewBag.Niveaux = new SelectList(Niveaux);
+        return View();
+    }
+
     [HttpGet]
     public IActionResult CreatePartial()
     {
+        ViewBag.Parcours = new SelectList(_context.Parcours, "Id", "NomParcours");
+        ViewBag.Niveaux = new SelectList(Niveaux);
         return PartialView("_Form", new Cours());
     }
 
-    // JSON API for paged list
     [HttpGet]
     public async Task<IActionResult> ListJson(string q = "", string sort = "name", int page = 1, int pageSize = 10, int minCredit = 0)
     {
-        var query = _context.Cours.AsQueryable();
+        var query = _context.Cours.Include(c => c.Parcours).ThenInclude(p => p!.Mention).AsQueryable();
         if (!string.IsNullOrWhiteSpace(q))
             query = query.Where(c => c.NomCours.Contains(q));
         if (minCredit > 0)
@@ -46,7 +55,16 @@ public class CoursController : Controller
             _ => query.OrderBy(c => c.NomCours),
         };
 
-        var items = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+        var items = await query.Skip((page - 1) * pageSize).Take(pageSize)
+            .Select(c => new {
+                c.Id,
+                c.NomCours,
+                c.Credit,
+                c.Niveau,
+                parcours = c.Parcours != null ? c.Parcours.NomParcours : null,
+                mention = c.Parcours != null && c.Parcours.Mention != null ? c.Parcours.Mention.NomMention : null
+            })
+            .ToListAsync();
 
         return Json(new { items, total });
     }
@@ -70,21 +88,27 @@ public class CoursController : Controller
         });
     }
 
-    // Edit actions
     public async Task<IActionResult> Edit(int? id)
     {
         if (id == null) return NotFound();
         var cours = await _context.Cours.FindAsync(id.Value);
         if (cours == null) return NotFound();
+        ViewBag.Parcours = new SelectList(_context.Parcours, "Id", "NomParcours", cours.ParcoursId);
+        ViewBag.Niveaux = new SelectList(Niveaux, cours.Niveau);
         return View(cours);
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, [Bind("Id,NomCours,Credit")] Cours cours)
+    public async Task<IActionResult> Edit(int id, [Bind("Id,NomCours,Credit,Niveau,ParcoursId")] Cours cours)
     {
         if (id != cours.Id) return NotFound();
-        if (!ModelState.IsValid) return View(cours);
+        if (!ModelState.IsValid)
+        {
+            ViewBag.Parcours = new SelectList(_context.Parcours, "Id", "NomParcours", cours.ParcoursId);
+            ViewBag.Niveaux = new SelectList(Niveaux, cours.Niveau);
+            return View(cours);
+        }
 
         try
         {
@@ -102,11 +126,10 @@ public class CoursController : Controller
         return RedirectToAction(nameof(Index));
     }
 
-    // Delete actions
     public async Task<IActionResult> Delete(int? id)
     {
         if (id == null) return NotFound();
-        var cours = await _context.Cours.FirstOrDefaultAsync(m => m.Id == id.Value);
+        var cours = await _context.Cours.Include(c => c.Parcours).FirstOrDefaultAsync(m => m.Id == id.Value);
         if (cours == null) return NotFound();
         return View(cours);
     }
@@ -127,7 +150,7 @@ public class CoursController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create([Bind("Id,NomCours,Credit")] Cours cours)
+    public async Task<IActionResult> Create([Bind("Id,NomCours,Credit,Niveau,ParcoursId")] Cours cours)
     {
         if (ModelState.IsValid)
         {
@@ -140,6 +163,8 @@ public class CoursController : Controller
             return RedirectToAction(nameof(Index));
         }
 
+        ViewBag.Parcours = new SelectList(_context.Parcours, "Id", "NomParcours", cours.ParcoursId);
+        ViewBag.Niveaux = new SelectList(Niveaux, cours.Niveau);
         if (Request.Headers["X-Requested-With"] == "XMLHttpRequest") return PartialView("_Form", cours);
         return View(cours);
     }

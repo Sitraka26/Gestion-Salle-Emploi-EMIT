@@ -206,14 +206,23 @@ public class SeancesController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(Seance seance)
     {
-        var conflit = await _context.Seances
-            .AnyAsync(s => s.Jour == seance.Jour 
-                        && s.HeureDebut == seance.HeureDebut 
-                        && (s.SalleId == seance.SalleId || s.EnseignantId == seance.EnseignantId));
+        var candidats = await _context.Seances
+            .Where(s => s.Jour == seance.Jour && (s.SalleId == seance.SalleId || s.EnseignantId == seance.EnseignantId))
+            .ToListAsync();
+        var conflit = candidats.Any(s => CreneauxSeChevauchent(s.HeureDebut, s.HeureFin, seance.HeureDebut, seance.HeureFin));
 
-        if (conflit)
+        var indisponibilites = await _context.Indisponibilites
+            .Where(i => i.EnseignantId == seance.EnseignantId && i.Jour == seance.Jour)
+            .ToListAsync();
+        var indisponible = indisponibilites.Any(i => CreneauxSeChevauchent(i.HeureDebut, i.HeureFin, seance.HeureDebut, seance.HeureFin));
+
+        if (conflit || indisponible)
         {
-            ModelState.AddModelError("", "🚨 Alerte Conflit : La salle ou l'enseignant est déjà affecté à un cours sur ce créneau !");
+            if (conflit)
+                ModelState.AddModelError("", "🚨 Alerte Conflit : La salle ou l'enseignant est déjà affecté à un cours sur ce créneau !");
+            if (indisponible)
+                ModelState.AddModelError("", "🚫 Cet enseignant a déclaré être indisponible sur ce créneau (pris par une autre université).");
+
             ViewBag.Salles = new SelectList(_context.Salles, "Id", "NomSalle", seance.SalleId);
             ViewBag.Enseignants = new SelectList(_context.Enseignants, "Id", "Nom", seance.EnseignantId);
             ViewBag.Cours = new SelectList(_context.Cours, "Id", "NomCours", seance.CoursId);
@@ -322,16 +331,26 @@ public class SeancesController : Controller
     {
         if (id != seance.Id) return NotFound();
 
-        var conflit = await _context.Seances
-            .AnyAsync(s => s.Id != seance.Id && s.Jour == seance.Jour && s.HeureDebut == seance.HeureDebut
-                        && (s.SalleId == seance.SalleId || s.EnseignantId == seance.EnseignantId));
+        var candidats = await _context.Seances
+            .Where(s => s.Id != seance.Id && s.Jour == seance.Jour && (s.SalleId == seance.SalleId || s.EnseignantId == seance.EnseignantId))
+            .ToListAsync();
+        var conflit = candidats.Any(s => CreneauxSeChevauchent(s.HeureDebut, s.HeureFin, seance.HeureDebut, seance.HeureFin));
+
+        var indisponibilites = await _context.Indisponibilites
+            .Where(i => i.EnseignantId == seance.EnseignantId && i.Jour == seance.Jour)
+            .ToListAsync();
+        var indisponible = indisponibilites.Any(i => CreneauxSeChevauchent(i.HeureDebut, i.HeureFin, seance.HeureDebut, seance.HeureFin));
 
         if (conflit)
         {
             ModelState.AddModelError("", "🚨 Alerte Conflit : la salle ou l'enseignant est déjà pris sur ce créneau !");
         }
+        if (indisponible)
+        {
+            ModelState.AddModelError("", "🚫 Cet enseignant a déclaré être indisponible sur ce créneau (pris par une autre université).");
+        }
 
-        if (ModelState.IsValid && !conflit)
+        if (ModelState.IsValid && !conflit && !indisponible)
         {
             _context.Update(seance);
             await _context.SaveChangesAsync();
@@ -369,6 +388,15 @@ public class SeancesController : Controller
             TempData["SuccessMessage"] = "Séance supprimée.";
         }
         return RedirectToAction(nameof(Index));
+    }
+    private bool CreneauxSeChevauchent(string debut1, string fin1, string debut2, string fin2)
+    {
+        if (TimeSpan.TryParse(debut1, out var d1) && TimeSpan.TryParse(fin1, out var f1) &&
+            TimeSpan.TryParse(debut2, out var d2) && TimeSpan.TryParse(fin2, out var f2))
+        {
+            return d1 < f2 && d2 < f1;
+        }
+        return debut1 == debut2;
     }
 
     private int DayToNumber(string jour)
