@@ -9,7 +9,6 @@ using QuestPDF.Fluent;
 using QuestPDF.Infrastructure;
 using QuestPDF.Helpers;
 
-
 namespace GestionSallesEmit.Controllers;
 
 public class SeancesController : Controller
@@ -193,7 +192,7 @@ public class SeancesController : Controller
     {
         ViewBag.Salles = new SelectList(_context.Salles, "Id", "NomSalle");
         ViewBag.Enseignants = new SelectList(_context.Enseignants, "Id", "Nom");
-        ViewBag.Cours = new SelectList(_context.Cours, "Id", "NomCours");
+        ViewBag.Cours = new SelectList(_context.Cours.Select(c => new { c.Id, Libelle = c.NomCours + " — " + c.Niveau + (c.Parcours != null ? " (" + c.Parcours.NomParcours + ")" : "") }), "Id", "Libelle");
 
         var model = new Seance();
         if (!string.IsNullOrEmpty(jour)) model.Jour = System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(jour.ToLower());
@@ -226,7 +225,7 @@ public class SeancesController : Controller
 
             ViewBag.Salles = new SelectList(_context.Salles, "Id", "NomSalle", seance.SalleId);
             ViewBag.Enseignants = new SelectList(_context.Enseignants, "Id", "Nom", seance.EnseignantId);
-            ViewBag.Cours = new SelectList(_context.Cours, "Id", "NomCours", seance.CoursId);
+            ViewBag.Cours = new SelectList(_context.Cours.Select(c => new { c.Id, Libelle = c.NomCours + " — " + c.Niveau + (c.Parcours != null ? " (" + c.Parcours.NomParcours + ")" : "") }), "Id", "Libelle", seance.CoursId);
             return View(seance);
         }
 
@@ -322,7 +321,7 @@ public class SeancesController : Controller
 
         ViewBag.Salles = new SelectList(_context.Salles, "Id", "NomSalle", seance.SalleId);
         ViewBag.Enseignants = new SelectList(_context.Enseignants, "Id", "Nom", seance.EnseignantId);
-        ViewBag.Cours = new SelectList(_context.Cours, "Id", "NomCours", seance.CoursId);
+        ViewBag.Cours = new SelectList(_context.Cours.Select(c => new { c.Id, Libelle = c.NomCours + " — " + c.Niveau + (c.Parcours != null ? " (" + c.Parcours.NomParcours + ")" : "") }), "Id", "Libelle", seance.CoursId);
         return View(seance);
     }
 
@@ -362,7 +361,7 @@ public class SeancesController : Controller
 
         ViewBag.Salles = new SelectList(_context.Salles, "Id", "NomSalle", seance.SalleId);
         ViewBag.Enseignants = new SelectList(_context.Enseignants, "Id", "Nom", seance.EnseignantId);
-        ViewBag.Cours = new SelectList(_context.Cours, "Id", "NomCours", seance.CoursId);
+        ViewBag.Cours = new SelectList(_context.Cours.Select(c => new { c.Id, Libelle = c.NomCours + " — " + c.Niveau + (c.Parcours != null ? " (" + c.Parcours.NomParcours + ")" : "") }), "Id", "Libelle", seance.CoursId);
         return View(seance);
     }
 
@@ -390,6 +389,7 @@ public class SeancesController : Controller
         }
         return RedirectToAction(nameof(Index));
     }
+
     private bool CreneauxSeChevauchent(string debut1, string fin1, string debut2, string fin2)
     {
         if (TimeSpan.TryParse(debut1, out var d1) && TimeSpan.TryParse(fin1, out var f1) &&
@@ -414,8 +414,8 @@ public class SeancesController : Controller
             _ => 1
         };
     }
-}
-public async Task<IActionResult> ParClasse(int? parcoursId, string? niveau)
+
+    public async Task<IActionResult> ParClasse(int? parcoursId, string? niveau)
     {
         ViewBag.ParcoursListe = new SelectList(
             await _context.Parcours.Include(p => p.Mention).OrderBy(p => p.NomParcours).ToListAsync(),
@@ -471,3 +471,4 @@ public async Task<IActionResult> ParClasse(int? parcoursId, string? niveau)
 
         return View(model);
     }
+}
