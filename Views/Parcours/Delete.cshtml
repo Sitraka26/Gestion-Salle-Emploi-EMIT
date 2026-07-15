@@ -1,0 +1,18 @@
+@model GestionSallesEmit.Models.Parcours
+<div class="container mt-4"><div class="row justify-content-center"><div class="col-md-6"><div class="card shadow border-danger">
+    <div class="card-header bg-danger text-white"><h3 class="mb-0">Supprimer le Parcours</h3></div>
+    <div class="card-body">
+        <p>Supprimer <strong>@Model.NomParcours</strong> (@Model.Mention?.NomMention) ?</p>
+        @if (Model.Cours.Any())
+        {
+            <div class="alert alert-warning">⚠️ Des cours sont rattachés à ce parcours. Détachez-les d'abord.</div>
+        }
+        <form asp-action="Delete">
+            <input type="hidden" asp-for="Id" />
+            <div class="d-flex justify-content-between">
+                <a asp-action="Index" class="btn btn-secondary">Annuler</a>
+                <button type="submit" class="btn btn-danger" @(Model.Cours.Any() ? "disabled" : "")>Confirmer</button>
+            </div>
+        </form>
+    </div>
+</div></div></div></div>s

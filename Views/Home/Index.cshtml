@@ -1,0 +1,156 @@
+﻿@model GestionSallesEmit.Models.DashboardViewModel
+@{
+    ViewData["Title"] = "Tableau de bord";
+}
+
+<div class="dashboard-page py-4">
+    <div class="dashboard-page-content">
+        <section class="page-header">
+            <div>
+                <p class="text-uppercase text-primary small mb-2">Tableau de bord</p>
+                <h1 class="page-title">Une gestion claire et moderne pour votre établissement</h1>
+                <p class="page-description">Des statistiques visibles, des actions rapides et une navigation fluide pour piloter les salles, enseignants, cours et séances.</p>
+            </div>
+            <div class="page-actions">
+                <div class="d-flex flex-wrap gap-2">
+                    <a class="btn btn-gradient btn-lg" asp-controller="Cours" asp-action="Create">Ajouter un cours</a>
+                    <a class="btn btn-soft-primary btn-lg" asp-controller="Salles" asp-action="Create">Ajouter une salle</a>
+                    <a class="btn btn-soft-primary btn-lg" asp-controller="Enseignants" asp-action="Create">Ajouter un enseignant</a>
+                    <a class="btn btn-soft-secondary btn-lg" asp-controller="Salles" asp-action="Index">Voir les salles</a>
+                    <a class="btn btn-soft-white btn-lg" asp-controller="Seances" asp-action="Create">Planifier une séance</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="section-panel">
+            <div class="stats-grid">
+                <div class="stats-card">
+                    <div class="stat-label">Salles disponibles</div>
+                    <div class="stat-value">@Model.TotalSalles</div>
+                    <small class="text-muted">Aller à la gestion des salles</small>
+                    <a class="stretched-link" asp-controller="Salles" asp-action="Index"></a>
+                </div>
+                <div class="stats-card">
+                    <div class="stat-label">Enseignants actifs</div>
+                    <div class="stat-value">@Model.TotalEnseignants</div>
+                    <small class="text-muted">Voir les profils et les disponibilités</small>
+                    <a class="stretched-link" asp-controller="Enseignants" asp-action="Index"></a>
+                </div>
+                <div class="stats-card">
+                    <div class="stat-label">Cours programmés</div>
+                    <div class="stat-value">@Model.TotalCours</div>
+                    <small class="text-muted">Gérer les matières et crédits</small>
+                    <a class="stretched-link" asp-controller="Cours" asp-action="Index"></a>
+                </div>
+                <div class="stats-card">
+                    <div class="stat-label">Séances planifiées</div>
+                    <div class="stat-value">@Model.TotalSeances</div>
+                    <small class="text-muted">Voir l’emploi du temps complet</small>
+                    <a class="stretched-link" asp-controller="Seances" asp-action="Index"></a>
+                </div>
+            </div>
+            <div class="stats-grid mt-4">
+                <div class="stats-card bg-light">
+                    <div class="stat-label">Taux d’occupation moyen</div>
+                    <div class="stat-value">@Model.OccupancyRate</div>
+                    <small class="text-muted">Séances par salle en moyenne</small>
+                </div>
+                <div class="stats-card bg-light">
+                    <div class="stat-label">Salle la plus utilisée</div>
+                   <div class="stat-value">@(Model.MostUsedRoom ?? "Aucune")</div>
+                    <small class="text-muted">Salle ayant le plus de sessions</small>
+                </div>
+                <div class="stats-card bg-light">
+                    <div class="stat-label">Jour le plus chargé</div>
+                    <div class="stat-value">@(Model.BusiestDay ?? "Aucun")</div>
+                    <small class="text-muted">Jour avec le plus de séances</small>
+                </div>
+            </div>
+            <div class="section-panel mt-4">
+                <div class="mb-3">
+                    <h2 class="h5">Séances par jour</h2>
+                    <p class="text-muted">Visualisez les jours les plus chargés de la semaine.</p>
+                </div>
+                <canvas id="dashboardChart" height="150"></canvas>
+            </div>
+        </section>
+
+        <section class="section-panel">
+            <div class="control-toolbar">
+                <div>
+                    <h2 class="panel-title">Actions rapides</h2>
+                    <p class="text-muted mb-0">Toutes les actions clés sont maintenant rassemblées dans le panneau de droite.</p>
+                </div>
+            </div>
+        </section>
+
+        @section Scripts {
+            <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    const labels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize((string[])(ViewBag.ChartLabels ?? Array.Empty<string>())));
+                    const data = @Html.Raw(System.Text.Json.JsonSerializer.Serialize((int[])(ViewBag.ChartData ?? Array.Empty<int>())));
+                    const ctx = document.getElementById('dashboardChart');
+                    if (!ctx) return;
+                    new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'Séances par jour',
+                                data: data,
+                                backgroundColor: 'rgba(13, 110, 253, 0.65)',
+                                borderColor: 'rgba(13, 110, 253, 1)',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: { stepSize: 1 }
+                                }
+                            }
+                        }
+                    });
+                });
+            </script>
+        }
+    </div>
+
+    <aside class="dashboard-side-panel section-panel">
+        <div class="side-panel-head">
+            <p class="text-uppercase text-primary small mb-2">Menu</p>
+            <h2 class="h4 fw-bold text-white mb-3">Navigation rapide</h2>
+        </div>
+
+        <div class="side-menu mb-4">
+            <a class="side-menu-item" asp-controller="Home" asp-action="Index">
+                <span class="menu-text">Dashboard</span>
+                <span class="menu-icon">📊</span>
+            </a>
+            <a class="side-menu-item" asp-controller="Salles" asp-action="Index">
+                <span class="menu-text">Salles</span>
+                <span class="menu-icon">🏫</span>
+            </a>
+            <a class="side-menu-item" asp-controller="Enseignants" asp-action="Index">
+                <span class="menu-text">Enseignants</span>
+                <span class="menu-icon">👩‍🏫</span>
+            </a>
+            <a class="side-menu-item" asp-controller="Cours" asp-action="Index">
+                <span class="menu-text">Cours</span>
+                <span class="menu-icon">📚</span>
+            </a>
+            <a class="side-menu-item" asp-controller="Seances" asp-action="Index">
+                <span class="menu-text">Emploi du temps</span>
+                <span class="menu-icon">🗓️</span>
+            </a>
+        </div>
+
+        <div class="side-action-list" aria-hidden="true">
+            <!-- Actions moved to header area for clarity -->
+        </div>
+    </aside>
+</div>

@@ -1,0 +1,225 @@
+@{
+    ViewData["Title"] = "Emploi du Temps - EMIT";
+}
+
+<div class="container mt-4">
+
+    <section class="page-header">
+        <div>
+            <p class="text-uppercase text-primary small mb-2">Planification</p>
+            <h1 class="page-title">Emploi du Temps</h1>
+            <p class="page-description">Consultez, filtrez et organisez les séances de cours. Glissez-déposez directement sur le calendrier pour replanifier.</p>
+        </div>
+        <div class="page-actions">
+            <div class="d-flex flex-wrap gap-2">
+                <a class="btn btn-gradient btn-lg" asp-action="Create">➕ Planifier une séance</a>
+                <a class="btn btn-soft-white btn-lg" href="@Url.Action("ExportPdf")">📄 Export PDF</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="section-panel mt-4">
+        <div id="seancesSummary" class="stats-grid mb-4">
+            <div class="stats-card"><div class="stat-label">Séances planifiées</div><div class="stat-value" id="sumTotal">-</div></div>
+            <div class="stats-card"><div class="stat-label">Jour le plus chargé</div><div class="stat-value" id="sumBusiestDay">-</div><small class="stat-sub" id="sumBusiestCount"></small></div>
+            <div class="stats-card"><div class="stat-label">Enseignant le plus sollicité</div><div class="stat-value" id="sumTopTeacher">-</div></div>
+            <div class="stats-card"><div class="stat-label">Salle la plus utilisée</div><div class="stat-value" id="sumTopRoom">-</div></div>
+        </div>
+
+        <div class="control-toolbar mb-3">
+            <div class="d-flex flex-wrap gap-2 align-items-center">
+                <input type="text" id="searchInput" class="form-control" style="max-width:220px" placeholder="Cours, enseignant, salle..." />
+                <select id="jourFilter" class="form-select" style="max-width:160px">
+                    <option value="">Tous les jours</option>
+                    <option>Lundi</option><option>Mardi</option><option>Mercredi</option>
+                    <option>Jeudi</option><option>Vendredi</option><option>Samedi</option>
+                </select>
+                <select id="enseignantFilter" class="form-select" style="max-width:200px">
+                    <option value="">Tous les enseignants</option>
+                    @foreach (SelectListItem item in (ViewBag.Enseignants as SelectList) ?? new SelectList(Enumerable.Empty<SelectListItem>()))
+                    {
+                        <option value="@item.Value">@item.Text</option>
+                    }
+                </select>
+                <select id="salleFilter" class="form-select" style="max-width:180px">
+                    <option value="">Toutes les salles</option>
+                    @foreach (SelectListItem item in (ViewBag.Salles as SelectList) ?? new SelectList(Enumerable.Empty<SelectListItem>()))
+                    {
+                        <option value="@item.Value">@item.Text</option>
+                    }
+                </select>
+            </div>
+            <div class="btn-group">
+                <button type="button" id="btnVueTableau" class="btn btn-soft-primary active">📋 Tableau</button>
+                <button type="button" id="btnVueCalendrier" class="btn btn-soft-primary">🗓️ Calendrier</button>
+            </div>
+        </div>
+
+        <div id="vueTableau">
+            <div class="table-card">
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped mb-0">
+                        <thead>
+                            <tr>
+                                <th>Jour</th><th>Horaire</th><th>Cours</th><th>Enseignant</th><th>Salle</th><th class="text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="seancesBody"><tr><td colspan="6" class="text-center text-muted py-4">Chargement...</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+            <nav class="mt-3"><ul class="pagination justify-content-center" id="pagination"></ul></nav>
+        </div>
+
+        <div id="vueCalendrier" style="display:none;">
+            <div id="calendrier"></div>
+        </div>
+    </section>
+</div>
+
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+
+<script>
+(function () {
+    const searchInput = document.getElementById('searchInput');
+    const jourFilter = document.getElementById('jourFilter');
+    const enseignantFilter = document.getElementById('enseignantFilter');
+    const salleFilter = document.getElementById('salleFilter');
+    const seancesBody = document.getElementById('seancesBody');
+    const pagination = document.getElementById('pagination');
+    let currentPage = 1;
+
+    function currentParams() {
+        return new URLSearchParams({
+            q: searchInput.value || '',
+            jour: jourFilter.value || '',
+            enseignantId: enseignantFilter.value || '',
+            salleId: salleFilter.value || '',
+            page: currentPage,
+            pageSize: 8
+        });
+    }
+
+    async function loadTable() {
+        seancesBody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">Chargement...</td></tr>';
+        try {
+            const res = await fetch('@Url.Action("ListJson")?' + currentParams().toString());
+            const data = await res.json();
+            if (!data.items || data.items.length === 0) {
+                seancesBody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">Aucune séance trouvée.</td></tr>';
+                pagination.innerHTML = '';
+                return;
+            }
+            seancesBody.innerHTML = data.items.map(function (s) {
+                return '<tr>' +
+                    '<td><span class="badge bg-primary">' + s.jour + '</span></td>' +
+                    '<td><strong>' + s.heureDebut + '</strong> - ' + s.heureFin + '</td>' +
+                    '<td>' + s.cours + '</td>' +
+                    '<td>' + s.enseignant + '</td>' +
+                    '<td><span class="badge bg-info">' + s.salle + '</span></td>' +
+                    '<td class="text-center">' +
+                        '<a href="@Url.Action("Edit")/' + s.id + '" class="btn btn-sm btn-outline-warning">✏️</a> ' +
+                        '<a href="@Url.Action("Delete")/' + s.id + '" class="btn btn-sm btn-outline-danger">🗑️</a>' +
+                    '</td>' +
+                '</tr>';
+            }).join('');
+
+            const totalPages = Math.max(1, Math.ceil(data.total / 8));
+            let pagesHtml = '';
+            for (let p = 1; p <= totalPages; p++) {
+                pagesHtml += '<li class="page-item ' + (p === currentPage ? 'active' : '') + '"><a class="page-link" href="#" data-page="' + p + '">' + p + '</a></li>';
+            }
+            pagination.innerHTML = pagesHtml;
+            pagination.querySelectorAll('a.page-link').forEach(function (a) {
+                a.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    currentPage = parseInt(a.dataset.page, 10);
+                    loadTable();
+                });
+            });
+        } catch (err) {
+            seancesBody.innerHTML = '<tr><td colspan="6" class="text-center text-danger py-4">Erreur de chargement.</td></tr>';
+        }
+    }
+
+    async function loadSummary() {
+        try {
+            const res = await fetch('@Url.Action("SummaryJson")');
+            const data = await res.json();
+            document.getElementById('sumTotal').textContent = data.total ?? 0;
+            document.getElementById('sumBusiestDay').textContent = data.busiestDay ? data.busiestDay.jour : 'Aucun';
+            document.getElementById('sumBusiestCount').textContent = data.busiestDay ? (data.busiestDay.count + ' séances') : '';
+            document.getElementById('sumTopTeacher').textContent = data.topTeacher || 'Aucun';
+            document.getElementById('sumTopRoom').textContent = data.topRoom || 'Aucune';
+        } catch (err) { /* silencieux */ }
+    }
+
+    [searchInput, jourFilter, enseignantFilter, salleFilter].forEach(function (el) {
+        el.addEventListener('input', function () { currentPage = 1; loadTable(); });
+        el.addEventListener('change', function () { currentPage = 1; loadTable(); });
+    });
+
+    loadTable();
+    loadSummary();
+
+    const btnTableau = document.getElementById('btnVueTableau');
+    const btnCalendrier = document.getElementById('btnVueCalendrier');
+    const vueTableau = document.getElementById('vueTableau');
+    const vueCalendrier = document.getElementById('vueCalendrier');
+    let calendar, calendrierInitialise = false;
+
+    btnTableau.addEventListener('click', function () {
+        vueTableau.style.display = 'block';
+        vueCalendrier.style.display = 'none';
+        btnTableau.classList.add('active');
+        btnCalendrier.classList.remove('active');
+    });
+
+    btnCalendrier.addEventListener('click', function () {
+        vueTableau.style.display = 'none';
+        vueCalendrier.style.display = 'block';
+        btnCalendrier.classList.add('active');
+        btnTableau.classList.remove('active');
+
+        if (!calendrierInitialise) {
+            calendar = new FullCalendar.Calendar(document.getElementById('calendrier'), {
+                initialView: 'timeGridWeek',
+                locale: 'fr',
+                headerToolbar: { left: 'prev,next today', center: 'title', right: '' },
+                allDaySlot: false,
+                slotMinTime: '07:00:00',
+                slotMaxTime: '19:00:00',
+                editable: true,
+                height: 650,
+                events: '@Url.Action("Events")',
+                eventDrop: function (info) { persistEventChange(info); },
+                eventResize: function (info) { persistEventChange(info); }
+            });
+            calendar.render();
+            calendrierInitialise = true;
+        } else {
+            calendar.refetchEvents();
+        }
+    });
+
+    async function persistEventChange(info) {
+        try {
+            const res = await fetch('@Url.Action("UpdateEvent")', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    Id: parseInt(info.event.id, 10),
+                    Start: info.event.start.toISOString(),
+                    End: (info.event.end || info.event.start).toISOString()
+                })
+            });
+            const data = await res.json();
+            if (!data.success) info.revert();
+            loadTable();
+        } catch (err) {
+            info.revert();
+        }
+    }
+})();
+</script>q

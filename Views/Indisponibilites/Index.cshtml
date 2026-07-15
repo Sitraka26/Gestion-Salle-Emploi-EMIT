@@ -1,0 +1,37 @@
+@model IEnumerable<GestionSallesEmit.Models.Indisponibilite>
+@{
+    var enseignant = ViewBag.Enseignant as GestionSallesEmit.Models.Enseignant;
+}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="text-primary">🚫 Indisponibilités — @enseignant?.Nom @enseignant?.Prenom</h1>
+        <a asp-action="Create" asp-route-enseignantId="@enseignant?.Id" class="btn btn-success">➕ Déclarer une indisponibilité</a>
+    </div>
+    <p class="text-muted">Créneaux où cet enseignant n'est pas disponible pour l'EMIT.</p>
+    @if (TempData["SuccessMessage"] != null) { <div class="alert alert-success">@TempData["SuccessMessage"]</div> }
+    <div class="table-card">
+        <table class="table table-hover mb-0">
+            <thead><tr><th>Jour</th><th>Horaire</th><th>Raison</th><th class="text-center">Actions</th></tr></thead>
+            <tbody>
+                @if (!Model.Any())
+                {
+                    <tr><td colspan="4" class="text-center text-muted py-4">Aucune indisponibilité déclarée.</td></tr>
+                }
+                @foreach (var i in Model)
+                {
+                    <tr>
+                        <td><span class="badge bg-primary">@i.Jour</span></td>
+                        <td>@i.HeureDebut - @i.HeureFin</td>
+                        <td>@(i.Raison ?? "-")</td>
+                        <td class="text-center">
+                            <form asp-action="Delete" asp-route-id="@i.Id" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">🗑️</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <a asp-controller="Enseignants" asp-action="Index" class="btn btn-soft-primary mt-3">← Retour aux Enseignants</a>
+</div>

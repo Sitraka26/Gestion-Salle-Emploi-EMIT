@@ -1,0 +1,13 @@
+@model GestionSallesEmit.Models.Salle
+
+<div class="text-center py-4">
+    <h5 class="mb-3">Confirmer la suppression</h5>
+    <p class="text-muted mb-4">Voulez-vous vraiment supprimer la salle <strong>@Model.NomSalle</strong> ? Cette action est irréversible.</p>
+    <form method="post" asp-action="Delete" asp-route-id="@Model.Id">
+        @Html.AntiForgeryToken()
+        <div class="d-flex justify-content-center gap-2">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
+            <button type="submit" class="btn btn-danger">Supprimer</button>
+        </div>
+    </form>
+</div>

@@ -1,0 +1,23 @@
+@model GestionSallesEmit.Models.Parcours
+<div class="container mt-4"><div class="row justify-content-center"><div class="col-md-6"><div class="card shadow">
+    <div class="card-header bg-primary text-white"><h3 class="mb-0">Ajouter un Parcours</h3></div>
+    <div class="card-body">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+            <div class="mb-3">
+                <label class="form-label">Nom du Parcours</label>
+                <input asp-for="NomParcours" class="form-control" placeholder="ex: DA2I" />
+                <span asp-validation-for="NomParcours" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Mention</label>
+                <select asp-for="MentionId" class="form-select" asp-items="ViewBag.Mentions">
+                    <option value="">-- Choisir une mention --</option>
+                </select>
+                <span asp-validation-for="MentionId" class="text-danger"></span>
+            </div>
+            <div class="d-flex justify-content-between"><a asp-action="Index" class="btn btn-secondary">Retour</a><button type="submit" class="btn btn-primary">Enregistrer</button></div>
+        </form>
+    </div>
+</div></div></div></div>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

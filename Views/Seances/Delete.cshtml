@@ -1,0 +1,22 @@
+@model GestionSallesEmit.Models.Seance
+
+<div class="container mt-4"><div class="row justify-content-center"><div class="col-md-6"><div class="card shadow border-danger">
+    <div class="card-header bg-danger text-white"><h3 class="mb-0">🗑️ Supprimer la Séance</h3></div>
+    <div class="card-body">
+        <p>Êtes-vous sûr(e) de vouloir supprimer cette séance ?</p>
+        <dl class="row">
+            <dt class="col-sm-4">Jour</dt><dd class="col-sm-8">@Model.Jour</dd>
+            <dt class="col-sm-4">Horaire</dt><dd class="col-sm-8">@Model.HeureDebut - @Model.HeureFin</dd>
+            <dt class="col-sm-4">Cours</dt><dd class="col-sm-8">@Model.Cours?.NomCours</dd>
+            <dt class="col-sm-4">Enseignant</dt><dd class="col-sm-8">@Model.Enseignant?.Nom @Model.Enseignant?.Prenom</dd>
+            <dt class="col-sm-4">Salle</dt><dd class="col-sm-8">@Model.Salle?.NomSalle</dd>
+        </dl>
+        <form asp-action="Delete">
+            <input type="hidden" asp-for="Id" />
+            <div class="d-flex justify-content-between">
+                <a asp-action="Index" class="btn btn-secondary">Annuler</a>
+                <button type="submit" class="btn btn-danger">Confirmer la suppression</button>
+            </div>
+        </form>
+    </div>
+</div></div></div></div>

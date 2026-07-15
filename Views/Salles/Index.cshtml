@@ -1,0 +1,233 @@
+@{
+    ViewData["Title"] = "Salles";
+}
+
+<div class="container mt-4">
+    <section class="page-header">
+        <div>
+            <p class="text-uppercase text-primary small mb-2">Salles</p>
+            <h1 class="page-title">Salle et capacité en un coup d’œil</h1>
+            <p class="page-description">Organisez rapidement les salles, filtrez par nom et capacité, et gérez l’espace disponible sans confusion.</p>
+        </div>
+        <div class="page-actions">
+            <button id="addSalleBtn" class="btn btn-primary btn-lg">➕ Ajouter une salle</button>
+            <button id="refreshBtn" class="btn btn-soft-secondary btn-lg">🔄 Rafraîchir</button>
+        </div>
+    </section>
+
+    <section class="section-panel">
+        <div class="row gy-3 mb-4">
+            <div class="col-md-4">
+                <div class="stats-card">
+                    <div class="stat-label">Total de salles</div>
+                    <div class="stat-value" id="sallesTotal">0</div>
+                    <div class="stat-sub text-muted" id="sallesOccupiedNow">0 occupée</div>
+                    <small class="text-muted">Salles disponibles pour vos plannings.</small>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stats-card">
+                    <div class="stat-label">Capacité totale</div>
+                    <div class="stat-value" id="sallesCapacityTotal">0</div>
+                    <small class="text-muted">Place totale pour vos événements.</small>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stats-card">
+                    <div class="stat-label">Plus grande salle</div>
+                    <div class="stat-value" id="sallesLargestRoom">Aucune</div>
+                    <small class="text-muted">Salle avec la plus grande capacité.</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="control-toolbar">
+            <div>
+                <h2 class="panel-title">Mes salles</h2>
+                <p class="text-muted mb-0">Un tableau clair pour suivre la capacité et les actions disponibles.</p>
+            </div>
+            <div class="d-flex flex-wrap gap-2 align-items-center">
+                <label class="mb-0">Filtrer capacité</label>
+                <select id="capacityFilter" class="form-select d-inline-block w-auto ms-2">
+                    <option value="0">Tous</option>
+                    <option value="20">≥ 20 pers.</option>
+                    <option value="40">≥ 40 pers.</option>
+                </select>
+                <button id="highlightLarge" class="btn btn-soft-primary btn-sm">Voir grandes salles</button>
+                <label class="mb-0">Trier par</label>
+                <select id="sortSelect" class="form-select d-inline-block w-auto ms-2">
+                    <option value="name">Nom</option>
+                    <option value="cap">Capacité (desc)</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="row g-3 mb-4">
+            <div class="col-lg-6">
+                <input id="searchInput" class="form-control" placeholder="Rechercher une salle..." />
+            </div>
+        </div>
+
+        <div class="table-card">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle" id="sallesTable">
+                    <thead>
+                        <tr>
+                            <th>Nom de la Salle</th>
+                            <th style="width:130px">Capacité</th>
+                            <th style="width:160px">Statut</th>
+                            <th style="width:160px">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sallesBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <nav>
+        <ul class="pagination" id="pagination"></ul>
+    </nav>
+
+    <div class="modal fade" id="entityModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="entityModalLabel">Salle</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                </div>
+                <div class="modal-body" id="entityModalBody">Chargement…</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        (function(){
+            const pageSize = 8;
+            let page = 1;
+            const searchInput = document.getElementById('searchInput');
+            const sortSelect = document.getElementById('sortSelect');
+            const capacityFilter = document.getElementById('capacityFilter');
+            const highlightLarge = document.getElementById('highlightLarge');
+            const sallesBody = document.getElementById('sallesBody');
+            const pagination = document.getElementById('pagination');
+            const sallesTotal = document.getElementById('sallesTotal');
+            const sallesCapacityTotal = document.getElementById('sallesCapacityTotal');
+            const sallesLargestRoom = document.getElementById('sallesLargestRoom');
+            const entityModalEl = document.getElementById('entityModal');
+            const entityModalLabel = document.getElementById('entityModalLabel');
+            const entityModalBody = document.getElementById('entityModalBody');
+            const entityModal = new bootstrap.Modal(entityModalEl);
+
+            function renderRow(s) {
+                const capBadge = s.capacite >= 40
+                    ? '<span class="status-badge status-badge-success">Grande salle</span>'
+                    : s.capacite >= 20
+                        ? '<span class="status-badge status-badge-warning">Moyenne salle</span>'
+                        : '<span class="status-badge status-badge-secondary">Petite salle</span>';
+                const occupyBadge = s.isOccupied
+                    ? `<span class="status-badge status-badge-danger">🔴 Occupée jusqu'à ${s.occupiedUntil}</span>`
+                    : '<span class="status-badge status-badge-success">🟢 Libre maintenant</span>';
+                return `
+                    <tr>
+                        <td>${s.nomSalle}</td>
+                        <td>${s.capacite}</td>
+                        <td>${occupyBadge} <div class="mt-1">${capBadge}</div></td>
+                        <td class="text-center">
+                            <button type="button" class="btn btn-sm btn-primary me-1 editSalleBtn" data-id="${s.id}">Modifier</button>
+                            <button type="button" class="btn btn-sm btn-danger deleteSalleBtn" data-id="${s.id}">Supprimer</button>
+                        </td>
+                    </tr>`;
+            }
+
+            async function loadSummary() {
+                const minCapacite = parseInt(capacityFilter.value, 10) || 0;
+                const res = await fetch(`/Salles/SummaryJson?minCapacite=${minCapacite}`);
+                const summary = await res.json();
+                sallesTotal.textContent = summary.total;
+                sallesCapacityTotal.textContent = summary.totalCapacity;
+                sallesLargestRoom.textContent = summary.largestRoom ? `${summary.largestRoom.nomSalle} (${summary.largestRoom.capacite})` : 'Aucune';
+                const occEl = document.getElementById('sallesOccupiedNow');
+                if (occEl) occEl.textContent = summary.occupiedNow + ' occupée maintenant';
+            }
+
+            async function load(){
+                const q = encodeURIComponent(searchInput.value||'');
+                const sort = sortSelect.value;
+                const minCapacite = parseInt(capacityFilter.value, 10) || 0;
+                const res = await fetch(`/Salles/ListJson?q=${q}&sort=${sort}&page=${page}&pageSize=${pageSize}&minCapacite=${minCapacite}`);
+                const data = await res.json();
+                sallesBody.innerHTML = data.items.map(renderRow).join('');
+                attachRowActions();
+
+                const total = data.total;
+                const pages = Math.ceil(total/pageSize)||1;
+                pagination.innerHTML='';
+                for(let i=1;i<=pages;i++){
+                    const li=document.createElement('li');
+                    li.className='page-item'+(i===page?' active':'');
+                    li.innerHTML=`<a class="page-link" href="#">${i}</a>`;
+                    li.addEventListener('click',e=>{e.preventDefault(); page=i; load();});
+                    pagination.appendChild(li);
+                }
+            }
+
+            function attachRowActions(){
+                document.querySelectorAll('.editSalleBtn').forEach(btn => {
+                    btn.addEventListener('click', () => openModal(`/Salles/EditPartial?id=${btn.dataset.id}`, 'Modifier la salle'));
+                });
+                document.querySelectorAll('.deleteSalleBtn').forEach(btn => {
+                    btn.addEventListener('click', () => openModal(`/Salles/DeletePartial?id=${btn.dataset.id}`, 'Supprimer la salle'));
+                });
+            }
+
+            async function openModal(url, title) {
+                entityModalLabel.textContent = title;
+                entityModalBody.innerHTML = 'Chargement…';
+                const res = await fetch(url);
+                entityModalBody.innerHTML = await res.text();
+                wireModalForm();
+                entityModal.show();
+            }
+
+            function wireModalForm() {
+                const form = entityModalBody.querySelector('form');
+                if (!form) return;
+                if (window.jQuery && window.jQuery.validator && window.jQuery.validator.unobtrusive) {
+                    window.jQuery.validator.unobtrusive.parse(form);
+                }
+                form.addEventListener('submit', async (event) => {
+                    event.preventDefault();
+                    const formData = new FormData(form);
+                    const response = await fetch(form.action, {
+                        method: form.method || 'post',
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                        body: formData
+                    });
+                    const contentType = response.headers.get('Content-Type') || '';
+                    if (contentType.includes('application/json')) {
+                        const result = await response.json();
+                        if (result.success) {
+                            entityModal.hide();
+                            loadSummary();
+                            load();
+                        }
+                    } else {
+                        entityModalBody.innerHTML = await response.text();
+                        wireModalForm();
+                    }
+                }, { once: true });
+            }
+
+            document.getElementById('refreshBtn').addEventListener('click', ()=> { loadSummary(); load(); });
+            document.getElementById('addSalleBtn').addEventListener('click', () => openModal('/Salles/CreatePartial', 'Ajouter une salle'));
+            highlightLarge.addEventListener('click', ()=> { capacityFilter.value='40'; page=1; loadSummary(); load(); });
+            sortSelect.addEventListener('change', ()=>{ page=1; load(); });
+            capacityFilter.addEventListener('change', ()=>{ page=1; load(); loadSummary(); });
+            let debounce; searchInput.addEventListener('input', ()=>{ clearTimeout(debounce); debounce=setTimeout(()=>{ page=1; load(); },300); });
+            document.addEventListener('DOMContentLoaded', ()=>{ loadSummary(); load(); });
+        })();
+    </script>
+}

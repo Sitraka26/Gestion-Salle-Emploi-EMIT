@@ -1,0 +1,18 @@
+@model GestionSallesEmit.Models.Mention
+<div class="container mt-4"><div class="row justify-content-center"><div class="col-md-6"><div class="card shadow border-danger">
+    <div class="card-header bg-danger text-white"><h3 class="mb-0">Supprimer la Mention</h3></div>
+    <div class="card-body">
+        <p>Supprimer <strong>@Model.NomMention</strong> ?</p>
+        @if (Model.Parcours.Any())
+        {
+            <div class="alert alert-warning">⚠️ Cette mention a des parcours rattachés. Supprimez-les d'abord.</div>
+        }
+        <form asp-action="Delete">
+            <input type="hidden" asp-for="Id" />
+            <div class="d-flex justify-content-between">
+                <a asp-action="Index" class="btn btn-secondary">Annuler</a>
+                <button type="submit" class="btn btn-danger" @(Model.Parcours.Any() ? "disabled" : "")>Confirmer</button>
+            </div>
+        </form>
+    </div>
+</div></div></div></div>

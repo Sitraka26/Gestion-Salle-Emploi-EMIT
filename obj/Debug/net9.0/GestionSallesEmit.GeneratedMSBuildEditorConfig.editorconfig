@@ -1,0 +1,161 @@
+is_global = true
+build_property.TargetFramework = net9.0
+build_property.TargetPlatformMinVersion = 
+build_property.UsingMicrosoftNETSdkWeb = true
+build_property.ProjectTypeGuids = 
+build_property.InvariantGlobalization = 
+build_property.PlatformNeutralAssembly = 
+build_property.EnforceExtendedAnalyzerRules = 
+build_property._SupportedPlatformList = Linux,macOS,Windows
+build_property.RootNamespace = GestionSallesEmit
+build_property.RootNamespace = GestionSallesEmit
+build_property.ProjectDir = C:\Users\ASUS\Downloads\Gestion-Salle-Emploi-EMIT-avec-planning-classe\Gestion-Salle-Emploi-Emit-main\GestionSallesEmit\
+build_property.EnableComHosting = 
+build_property.EnableGeneratedComInterfaceComImportInterop = 
+build_property.RazorLangVersion = 9.0
+build_property.SupportLocalizedComponentNames = 
+build_property.GenerateRazorMetadataSourceChecksumAttributes = 
+build_property.MSBuildProjectDirectory = C:\Users\ASUS\Downloads\Gestion-Salle-Emploi-EMIT-avec-planning-classe\Gestion-Salle-Emploi-Emit-main\GestionSallesEmit
+build_property._RazorSourceGeneratorDebug = 
+build_property.EffectiveAnalysisLevelStyle = 9.0
+build_property.EnableCodeStyleSeverity = 
+
+[C:/Users/ASUS/Downloads/Gestion-Salle-Emploi-EMIT-avec-planning-classe/Gestion-Salle-Emploi-Emit-main/GestionSallesEmit/Views/Cours/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ291cnNcQ3JlYXRlLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/ASUS/Downloads/Gestion-Salle-Emploi-EMIT-avec-planning-classe/Gestion-Salle-Emploi-Emit-main/GestionSallesEmit/Views/Cours/Delete.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ291cnNcRGVsZXRlLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/ASUS/Downloads/Gestion-Salle-Emploi-EMIT-avec-planning-classe/Gestion-Salle-Emploi-Emit-main/GestionSallesEmit/Views/Cours/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ291cnNcRWRpdC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/ASUS/Downloads/Gestion-Salle-Emploi-EMIT-avec-planning-classe/Gestion-Salle-Emploi-Emit-main/GestionSallesEmit/Views/Cours/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ291cnNcSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/ASUS/Downloads/Gestion-Salle-Emploi-EMIT-avec-planning-classe/Gestion-Salle-Emploi-Emit-main/GestionSallesEmit/Views/Cours/_Form.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ291cnNcX0Zvcm0uY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/ASUS/Downloads/Gestion-Salle-Emploi-EMIT-avec-planning-classe/Gestion-Salle-Emploi-Emit-main/GestionSallesEmit/Views/Enseignants/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRW5zZWlnbmFudHNcQ3JlYXRlLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/ASUS/Downloads/Gestion-Salle-Emploi-EMIT-avec-planning-classe/Gestion-Salle-Emploi-Emit-main/GestionSallesEmit/Views/Enseignants/Delete.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRW5zZWlnbmFudHNcRGVsZXRlLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/ASUS/Downloads/Gestion-Salle-Emploi-EMIT-avec-planning-classe/Gestion-Salle-Emploi-Emit-main/GestionSallesEmit/Views/Enseignants/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRW5zZWlnbmFudHNcRWRpdC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/ASUS/Downloads/Gestion-Salle-Emploi-EMIT-avec-planning-classe/Gestion-Salle-Emploi-Emit-main/GestionSallesEmit/Views/Enseignants/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRW5zZWlnbmFudHNcSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/ASUS/Downloads/Gestion-Salle-Emploi-EMIT-avec-planning-classe/Gestion-Salle-Emploi-Emit-main/GestionSallesEmit/Views/Home/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/ASUS/Downloads/Gestion-Salle-Emploi-EMIT-avec-planning-classe/Gestion-Salle-Emploi-Emit-main/GestionSallesEmit/Views/Home/Privacy.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxQcml2YWN5LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/ASUS/Downloads/Gestion-Salle-Emploi-EMIT-avec-planning-classe/Gestion-Salle-Emploi-Emit-main/GestionSallesEmit/Views/Indisponibilites/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSW5kaXNwb25pYmlsaXRlc1xDcmVhdGUuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/ASUS/Downloads/Gestion-Salle-Emploi-EMIT-avec-planning-classe/Gestion-Salle-Emploi-Emit-main/GestionSallesEmit/Views/Indisponibilites/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSW5kaXNwb25pYmlsaXRlc1xJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/ASUS/Downloads/Gestion-Salle-Emploi-EMIT-avec-planning-classe/Gestion-Salle-Emploi-Emit-main/GestionSallesEmit/Views/Mentions/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTWVudGlvbnNcQ3JlYXRlLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/ASUS/Downloads/Gestion-Salle-Emploi-EMIT-avec-planning-classe/Gestion-Salle-Emploi-Emit-main/GestionSallesEmit/Views/Mentions/Delete.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTWVudGlvbnNcRGVsZXRlLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/ASUS/Downloads/Gestion-Salle-Emploi-EMIT-avec-planning-classe/Gestion-Salle-Emploi-Emit-main/GestionSallesEmit/Views/Mentions/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTWVudGlvbnNcSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/ASUS/Downloads/Gestion-Salle-Emploi-EMIT-avec-planning-classe/Gestion-Salle-Emploi-Emit-main/GestionSallesEmit/Views/Parcours/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUGFyY291cnNcQ3JlYXRlLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/ASUS/Downloads/Gestion-Salle-Emploi-EMIT-avec-planning-classe/Gestion-Salle-Emploi-Emit-main/GestionSallesEmit/Views/Parcours/Delete.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUGFyY291cnNcRGVsZXRlLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/ASUS/Downloads/Gestion-Salle-Emploi-EMIT-avec-planning-classe/Gestion-Salle-Emploi-Emit-main/GestionSallesEmit/Views/Parcours/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUGFyY291cnNcSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/ASUS/Downloads/Gestion-Salle-Emploi-EMIT-avec-planning-classe/Gestion-Salle-Emploi-Emit-main/GestionSallesEmit/Views/Salles/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2FsbGVzXENyZWF0ZS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/ASUS/Downloads/Gestion-Salle-Emploi-EMIT-avec-planning-classe/Gestion-Salle-Emploi-Emit-main/GestionSallesEmit/Views/Salles/Delete.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2FsbGVzXERlbGV0ZS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/ASUS/Downloads/Gestion-Salle-Emploi-EMIT-avec-planning-classe/Gestion-Salle-Emploi-Emit-main/GestionSallesEmit/Views/Salles/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2FsbGVzXEVkaXQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/ASUS/Downloads/Gestion-Salle-Emploi-EMIT-avec-planning-classe/Gestion-Salle-Emploi-Emit-main/GestionSallesEmit/Views/Salles/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2FsbGVzXEluZGV4LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/ASUS/Downloads/Gestion-Salle-Emploi-EMIT-avec-planning-classe/Gestion-Salle-Emploi-Emit-main/GestionSallesEmit/Views/Salles/_DeleteConfirmation.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2FsbGVzXF9EZWxldGVDb25maXJtYXRpb24uY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/ASUS/Downloads/Gestion-Salle-Emploi-EMIT-avec-planning-classe/Gestion-Salle-Emploi-Emit-main/GestionSallesEmit/Views/Salles/_Form.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2FsbGVzXF9Gb3JtLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/ASUS/Downloads/Gestion-Salle-Emploi-EMIT-avec-planning-classe/Gestion-Salle-Emploi-Emit-main/GestionSallesEmit/Views/Seances/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2VhbmNlc1xDcmVhdGUuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/ASUS/Downloads/Gestion-Salle-Emploi-EMIT-avec-planning-classe/Gestion-Salle-Emploi-Emit-main/GestionSallesEmit/Views/Seances/Delete.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2VhbmNlc1xEZWxldGUuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/ASUS/Downloads/Gestion-Salle-Emploi-EMIT-avec-planning-classe/Gestion-Salle-Emploi-Emit-main/GestionSallesEmit/Views/Seances/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2VhbmNlc1xFZGl0LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/ASUS/Downloads/Gestion-Salle-Emploi-EMIT-avec-planning-classe/Gestion-Salle-Emploi-Emit-main/GestionSallesEmit/Views/Seances/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2VhbmNlc1xJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/ASUS/Downloads/Gestion-Salle-Emploi-EMIT-avec-planning-classe/Gestion-Salle-Emploi-Emit-main/GestionSallesEmit/Views/Seances/ParClasse.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2VhbmNlc1xQYXJDbGFzc2UuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/ASUS/Downloads/Gestion-Salle-Emploi-EMIT-avec-planning-classe/Gestion-Salle-Emploi-Emit-main/GestionSallesEmit/Views/Shared/Error.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXEVycm9yLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/ASUS/Downloads/Gestion-Salle-Emploi-EMIT-avec-planning-classe/Gestion-Salle-Emploi-Emit-main/GestionSallesEmit/Views/Shared/_ValidationScriptsPartial.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9WYWxpZGF0aW9uU2NyaXB0c1BhcnRpYWwuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/ASUS/Downloads/Gestion-Salle-Emploi-EMIT-avec-planning-classe/Gestion-Salle-Emploi-Emit-main/GestionSallesEmit/Views/_ViewImports.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcX1ZpZXdJbXBvcnRzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/ASUS/Downloads/Gestion-Salle-Emploi-EMIT-avec-planning-classe/Gestion-Salle-Emploi-Emit-main/GestionSallesEmit/Views/_ViewStart.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcX1ZpZXdTdGFydC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/ASUS/Downloads/Gestion-Salle-Emploi-EMIT-avec-planning-classe/Gestion-Salle-Emploi-Emit-main/GestionSallesEmit/Views/Shared/_Layout.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9MYXlvdXQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = b-l7lec2jovi
