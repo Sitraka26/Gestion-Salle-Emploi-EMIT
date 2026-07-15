@@ -9,6 +9,7 @@ using QuestPDF.Fluent;
 using QuestPDF.Infrastructure;
 using QuestPDF.Helpers;
 
+
 namespace GestionSallesEmit.Controllers;
 
 public class SeancesController : Controller
@@ -414,3 +415,59 @@ public class SeancesController : Controller
         };
     }
 }
+public async Task<IActionResult> ParClasse(int? parcoursId, string? niveau)
+    {
+        ViewBag.ParcoursListe = new SelectList(
+            await _context.Parcours.Include(p => p.Mention).OrderBy(p => p.NomParcours).ToListAsync(),
+            "Id", "NomParcours", parcoursId);
+        ViewBag.NiveauxListe = new SelectList(new[] { "L1", "L2", "L3", "M1", "M2" }, niveau);
+        ViewBag.ParcoursId = parcoursId;
+        ViewBag.Niveau = niveau;
+
+        var model = new PlanningClasseViewModel();
+        foreach (var j in model.Jours) model.BlocsParJour[j] = new List<BlocSeance>();
+
+        if (parcoursId.HasValue && !string.IsNullOrEmpty(niveau))
+        {
+            var parcours = await _context.Parcours.Include(p => p.Mention)
+                .FirstOrDefaultAsync(p => p.Id == parcoursId.Value);
+
+            if (parcours != null)
+            {
+                model.MentionNom = parcours.Mention?.NomMention ?? "";
+                model.ParcoursNom = parcours.NomParcours;
+                model.Niveau = niveau;
+
+                var seances = await _context.Seances
+                    .Include(s => s.Cours).Include(s => s.Enseignant).Include(s => s.Salle)
+                    .Where(s => s.Cours!.ParcoursId == parcoursId.Value && s.Cours!.Niveau == niveau)
+                    .ToListAsync();
+
+                string[] palette = { "#5fb3e8", "#5cbf8e", "#f2a35c", "#c98ee0", "#e07a7a", "#8ecfe0", "#e8d15f", "#a3d977", "#f28cb1" };
+
+                foreach (var s in seances)
+                {
+                    if (!model.BlocsParJour.ContainsKey(s.Jour)) continue;
+                    if (!TimeSpan.TryParse(s.HeureDebut, out var debut) || !TimeSpan.TryParse(s.HeureFin, out var fin)) continue;
+
+                    int heureDebut = debut.Hours;
+                    int dureeMinutes = (int)(fin - debut).TotalMinutes;
+                    int duree = Math.Max(1, (int)Math.Ceiling(dureeMinutes / 60.0));
+
+                    int idxCouleur = Math.Abs(s.Cours!.NomCours.GetHashCode()) % palette.Length;
+
+                    model.BlocsParJour[s.Jour].Add(new BlocSeance
+                    {
+                        HeureDebut = heureDebut,
+                        DureeHeures = duree,
+                        Cours = s.Cours!.NomCours,
+                        Enseignant = $"{s.Enseignant?.Nom} {s.Enseignant?.Prenom}",
+                        Salle = s.Salle?.NomSalle ?? "-",
+                        Couleur = palette[idxCouleur]
+                    });
+                }
+            }
+        }
+
+        return View(model);
+    }

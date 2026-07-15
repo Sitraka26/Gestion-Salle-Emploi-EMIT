@@ -1,0 +1,108 @@
+@model GestionSallesEmit.Models.PlanningClasseViewModel
+@{
+    ViewData["Title"] = "Emploi du Temps par Classe";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4 no-print">
+    <h1 class="h3 fw-bold mb-0">📋 Emploi du Temps par Classe</h1>
+    <a asp-action="Index" class="btn btn-outline-secondary">← Retour au calendrier global</a>
+</div>
+
+<form method="get" asp-action="ParClasse" class="row g-3 align-items-end mb-4 no-print">
+    <div class="col-md-5">
+        <label class="form-label">Parcours</label>
+        <select name="parcoursId" class="form-select" asp-items="ViewBag.ParcoursListe">
+            <option value="">-- Choisir un parcours --</option>
+        </select>
+    </div>
+    <div class="col-md-4">
+        <label class="form-label">Niveau</label>
+        <select name="niveau" class="form-select" asp-items="ViewBag.NiveauxListe">
+            <option value="">-- Choisir un niveau --</option>
+        </select>
+    </div>
+    <div class="col-md-3">
+        <button type="submit" class="btn btn-primary w-100">Afficher l'emploi du temps</button>
+    </div>
+</form>
+
+@if (!string.IsNullOrEmpty(Model.ParcoursNom))
+{
+    <div class="text-end mb-2 no-print">
+        <button onclick="window.print()" class="btn btn-outline-dark btn-sm">🖨️ Imprimer</button>
+    </div>
+
+    <div class="planning-header mb-3 p-3 border rounded">
+        <div class="row">
+            <div class="col-md-8">
+                <div><strong>MENTION :</strong> @Model.MentionNom.ToUpper()</div>
+                <div><strong>PARCOURS :</strong> @Model.ParcoursNom.ToUpper()</div>
+                <div><strong>NIVEAU :</strong> @Model.Niveau</div>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <div><strong>ANNÉE UNIVERSITAIRE :</strong> @($"{DateTime.Now.Year}-{DateTime.Now.Year + 1}")</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-bordered planning-table text-center align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th style="width:110px;">Horaires</th>
+                    @foreach (var jour in Model.Jours)
+                    {
+                        <th>@jour</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    var skip = Model.Jours.ToDictionary(j => j, j => 0);
+                }
+                @for (int h = Model.HeureDebutGrille; h < Model.HeureFinGrille; h++)
+                {
+                    <tr>
+                        <td class="fw-semibold table-light">@($"{h}h00 - {h + 1}h00")</td>
+                        @foreach (var jour in Model.Jours)
+                        {
+                            if (skip[jour] > 0)
+                            {
+                                skip[jour]--;
+                            }
+                            else
+                            {
+                                var bloc = Model.BlocsParJour[jour].FirstOrDefault(b => b.HeureDebut == h);
+                                if (bloc != null)
+                                {
+                                    skip[jour] = bloc.DureeHeures - 1;
+                                    <td rowspan="@bloc.DureeHeures" style="background-color:@bloc.Couleur; color:#1a1a1a;">
+                                        <div class="fw-bold">@bloc.Cours</div>
+                                        <div class="small">@bloc.Enseignant</div>
+                                        <div class="small fst-italic">@bloc.Salle</div>
+                                    </td>
+                                }
+                                else
+                                {
+                                    <td></td>
+                                }
+                            }
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+else
+{
+    <div class="alert alert-info no-print">Choisis un parcours et un niveau ci-dessus pour afficher l'emploi du temps correspondant.</div>
+}
+
+<style>
+    .planning-table td, .planning-table th { vertical-align: middle; }
+    @@media print {
+        .no-print { display: none !important; }
+        body { background: #fff; }
+    }
+</style>
